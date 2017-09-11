@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="10dp">
+
+
+    <TextView
+        android:id="@+id/player_name"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/player_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/player" />
+
+    <TextView
+        android:id="@+id/fine_sum"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+
+</LinearLayout>

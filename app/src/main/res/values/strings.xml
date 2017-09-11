@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Fineslist</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_player_details" translatable="false">PlayerDetailsActivity</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_fair">Adding a new Fair</string>
+    <string name="delete_text">Delete</string>
+</resources>

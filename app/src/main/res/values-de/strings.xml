@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bussenliste</string>
+    <string name="add_fair">Neue Busse hinzufügen</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="ok">OK</string>
+    <string name="title_activity_player_details"></string>
+</resources>
