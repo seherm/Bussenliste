@@ -87,6 +87,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                                 selectedPlayer.getFines().remove(selectedItem);
                             }
                         }
+                        totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
                         dataSourcePlayer.open();
                         try {
                             dataSourcePlayer.updatePlayer(selectedPlayer.getId(),selectedPlayer.getFines());

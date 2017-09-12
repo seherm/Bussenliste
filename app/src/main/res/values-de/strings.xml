@@ -6,4 +6,5 @@
     <string name="cancel">Abbrechen</string>
     <string name="ok">OK</string>
     <string name="title_activity_player_details"></string>
+    <string name="delete_text">Löschen</string>
 </resources>

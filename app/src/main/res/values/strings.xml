@@ -6,4 +6,31 @@
     <string name="cancel">Cancel</string>
     <string name="add_fair">Adding a new Fair</string>
     <string name="delete_text">Delete</string>
+
+    <string-array name="fines">
+        <item name="delay">Verspätet ins Training</item>
+        <item name="forgottenMaterial">Material vergessen</item>
+    </string-array>
+
+    <string-array name="players">
+        <item>Rico Baumann</item>
+        <item>Roy Bucher</item>
+        <item>Christian Büchler</item>
+        <item>Basil Bühler</item>
+        <item>Robin Burch</item>
+        <item>Gino Delchiappo</item>
+        <item>Nico Ehrler</item>
+        <item>Kayoum Eicher</item>
+        <item>Basil Felber</item>
+        <item>Manuel Gautschi</item>
+        <item>Flavio Gnos</item>
+        <item>Basil Gnos</item>
+        <item>Sebastian Hermann</item>
+        <item>Milan Korac</item>
+        <item>Yves Mühlebach</item>
+        <item>Luca Peter</item>
+        <item>Franz Schnyder</item>
+        <item>Luca Stadelmann</item>
+        <item>Moritz Studer</item>
+    </string-array>
 </resources>
