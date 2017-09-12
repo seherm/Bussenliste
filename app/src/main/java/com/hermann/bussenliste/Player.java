@@ -14,12 +14,14 @@ public class Player implements Serializable{
     private String name;
     private ArrayList<Fine> fines;
     private int imageLayoutResourceId;
+    private String updateStatus;
 
 
-    public Player(long id, String name) {
+    public Player(long id, String name, String updateStatus) {
         this.id = id;
         this.name = name;
         this.fines = new ArrayList<>();
+        this.updateStatus = updateStatus;
     }
 
     public long getId() {
@@ -52,6 +54,14 @@ public class Player implements Serializable{
 
     public void setImageLayoutResourceId(int imageLayoutResourceId) {
         this.imageLayoutResourceId = imageLayoutResourceId;
+    }
+
+    public String getUpdateStatus() {
+        return updateStatus;
+    }
+
+    public void setUpdateStatus(String updateStatus) {
+        this.updateStatus = updateStatus;
     }
 
     public int getTotalSumOfFines(){

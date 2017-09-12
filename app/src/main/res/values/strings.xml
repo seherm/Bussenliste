@@ -6,6 +6,7 @@
     <string name="cancel">Cancel</string>
     <string name="add_fair">Adding a new Fair</string>
     <string name="delete_text">Delete</string>
+    <string name="action_sync">Sync</string>
 
     <string-array name="fines">
         <item name="delay">Verspätet ins Training</item>

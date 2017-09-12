@@ -12,20 +12,20 @@ import android.util.Log;
 public class DbHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "bussenliste.db";
-    public static final int DB_VERSION = 4;
+    public static final int DB_VERSION = 8;
 
     public static final String TABLE_PLAYERS = "players";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_FINES = "fines";
-
+    public static final String COLUMN_UPDATE_STATUS = "udpateStatus";
 
 
     public static final String SQL_CREATE_TABLE_PLAYERS =
             "CREATE TABLE " + TABLE_PLAYERS +
                     "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NAME + " TEXT NOT NULL, " + COLUMN_FINES + " TEXT);";
+                    COLUMN_NAME + " TEXT NOT NULL, " + COLUMN_FINES + " TEXT, " + COLUMN_UPDATE_STATUS + " TEXT);";
 
 
     public DbHelper(Context context) {
@@ -37,8 +37,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
         try {
             db.execSQL(SQL_CREATE_TABLE_PLAYERS);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
 
