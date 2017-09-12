@@ -2,7 +2,6 @@ package com.hermann.bussenliste;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by sebas on 04.09.2017.
