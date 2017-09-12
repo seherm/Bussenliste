@@ -192,7 +192,8 @@ public class DataSourcePlayer {
      * @param status
      */
     public void updateSyncStatus(String id, String status){
-        String updateQuery = "Update players set udpateStatus = '"+ status +"' where userId="+"'"+ id +"'";
+        open();
+        String updateQuery = "Update players set udpateStatus = '"+ status +"' where _id="+"'"+ id +"'";
         Log.d("query",updateQuery);
         database.execSQL(updateQuery);
         database.close();

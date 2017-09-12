@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,12 +102,12 @@ public class MainActivity extends AppCompatActivity {
         if (playerList.size() != 0) {
             if (dataSourcePlayer.dbSyncCount() != 0) {
                 params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
-                client.post("bussenliste.000webhostapp.com/insertplayer.php", params, new AsyncHttpResponseHandler() {
+                client.post("https://bussenliste.000webhostapp.com/insertplayer.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         System.out.println(responseBody);
                         try {
-                            JSONArray arr = new JSONArray(responseBody);
+                            JSONArray arr = new JSONArray(new String(responseBody));
                             System.out.println(arr.length());
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                         } else if (statusCode == 500) {
                             Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]" + statusCode, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
