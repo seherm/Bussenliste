@@ -134,14 +134,13 @@ public class PlayerDetailsActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int id) {
                 for (Object fine : selectedItems) {
                     if (fine.equals(0)) {
-                        selectedPlayer.addFine(FineType.VERSPÄTUNG);
+                        selectedPlayer.addFine(FineType.LATE_AT_THE_GAME);
                         finesAdapter.notifyDataSetChanged();
                         totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
                     } else if (fine.equals(1)) {
-                        selectedPlayer.addFine(FineType.VERGESSENESMATERIAL);
+                        selectedPlayer.addFine(FineType.LATE_IN_TRAINING);
                         finesAdapter.notifyDataSetChanged();
                         totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
-
                     } else {
                         break;
                     }

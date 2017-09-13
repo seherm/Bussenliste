@@ -5,5 +5,5 @@ package com.hermann.bussenliste;
  */
 
 public enum FineType {
-    VERSPÄTUNG, VERGESSENESMATERIAL
+    LATE_AT_THE_GAME, LATE_IN_TRAINING, FORGOT_THE_MATERIAL, PENALTY_FOR_COMPLAINING
 }

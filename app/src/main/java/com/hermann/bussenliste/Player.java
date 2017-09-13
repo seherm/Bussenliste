@@ -65,12 +65,16 @@ public class Player implements Serializable {
     public void addFine(FineType fineType) {
         Fine fine;
         switch (fineType) {
-            case VERSPÄTUNG:
-                fine = new Fine(FineType.VERSPÄTUNG, 5);
+            case LATE_AT_THE_GAME:
+                fine = new Fine(FineType.LATE_AT_THE_GAME, 20, R.string.LATE_AT_THE_GAME );
                 fines.add(fine);
                 break;
-            case VERGESSENESMATERIAL:
-                fine = new Fine(FineType.VERGESSENESMATERIAL, 5);
+            case LATE_IN_TRAINING:
+                fine = new Fine(FineType.LATE_IN_TRAINING, 5, R.string.LATE_IN_TRAINING);
+                fines.add(fine);
+                break;
+            case FORGOT_THE_MATERIAL:
+                fine = new Fine(FineType.FORGOT_THE_MATERIAL, 5, R.string.FORGOT_THE_MATERIAL);
                 fines.add(fine);
                 break;
             default:

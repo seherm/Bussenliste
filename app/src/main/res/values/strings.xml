@@ -8,9 +8,14 @@
     <string name="delete_text">Delete</string>
     <string name="action_sync">Sync</string>
 
+    <string name="LATE_AT_THE_GAME">Verspätet am Spiel (ohne Meldung)</string>
+    <string name="LATE_IN_TRAINING">Verspätet im Training (ohne Meldung)</string>
+    <string name="FORGOT_THE_MATERIAL">Material in der Halle/Garderobe vergessen</string>
+
     <string-array name="fines">
-        <item name="delay">Verspätet ins Training</item>
-        <item name="forgottenMaterial">Material vergessen</item>
+        <item name="LATE_AT_THE_GAME">@string/LATE_AT_THE_GAME</item>
+        <item name="LATE_IN_TRAINING">@string/LATE_IN_TRAINING</item>
+        <item name="FORGOT_THE_MATERIAL">@string/FORGOT_THE_MATERIAL</item>
     </string-array>
 
     <string-array name="players">
