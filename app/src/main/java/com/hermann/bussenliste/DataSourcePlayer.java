@@ -26,7 +26,6 @@ public class DataSourcePlayer {
     private SQLiteDatabase database;
     private DbHelper dbHelper;
 
-
     private String[] columns = {
             DbHelper.COLUMN_ID,
             DbHelper.COLUMN_NAME,
@@ -67,10 +66,11 @@ public class DataSourcePlayer {
     public Player updatePlayer(long id, List<Fine> newFairs) throws JSONException {
 
         Gson gson = new Gson();
-        String inputString= gson.toJson(newFairs);
+        String inputString = gson.toJson(newFairs);
 
         ContentValues values = new ContentValues();
         values.put(DbHelper.COLUMN_FINES, inputString);
+        values.put(DbHelper.COLUMN_UPDATE_STATUS, "no");
 
         database.update(DbHelper.TABLE_PLAYERS,
                 values,
@@ -93,19 +93,18 @@ public class DataSourcePlayer {
         int idIndex = cursor.getColumnIndex(DbHelper.COLUMN_ID);
         int idName = cursor.getColumnIndex(DbHelper.COLUMN_NAME);
         int idFines = cursor.getColumnIndex(DbHelper.COLUMN_FINES);
-        int idUpdateStatus = cursor.getColumnIndex(DbHelper.COLUMN_UPDATE_STATUS);
 
         long id = cursor.getLong(idIndex);
         String name = cursor.getString(idName);
         String fines = cursor.getString(idFines);
-        String updateStatus = cursor.getString(idUpdateStatus);
 
-        Player player = new Player(id, name, updateStatus);
+        Player player = new Player(id, name);
 
-        Type type = new TypeToken<ArrayList<Fine>>() {}.getType();
+        Type type = new TypeToken<ArrayList<Fine>>() {
+        }.getType();
         Gson gson = new Gson();
-        ArrayList<Fine>  finesList = gson.fromJson(fines, type);
-        if(finesList != null){
+        ArrayList<Fine> finesList = gson.fromJson(fines, type);
+        if (finesList != null) {
             player.setFines(finesList);
         }
 
@@ -121,7 +120,7 @@ public class DataSourcePlayer {
         cursor.moveToFirst();
         Player player;
 
-        while(!cursor.isAfterLast()) {
+        while (!cursor.isAfterLast()) {
             player = cursorToPlayer(cursor);
             playersList.add(player);
             cursor.moveToNext();
@@ -135,48 +134,51 @@ public class DataSourcePlayer {
 
     /**
      * Compose JSON out of SQLite records
+     *
      * @return
      */
-    public String composeJSONfromSQLite(){
+    public String composeJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM players where udpateStatus = '"+"no"+"'";
+        String selectQuery = "SELECT  * FROM players where udpateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("playerId", cursor.getString(0));
                 map.put("playerName", cursor.getString(1));
+                map.put("playerFines", cursor.getString(2));
                 wordList.add(map);
             } while (cursor.moveToNext());
         }
         cursor.close();
         Gson gson = new GsonBuilder().create();
-        //Use GSON to serialize Array List to JSON
         return gson.toJson(wordList);
     }
 
     /**
      * Get Sync status of SQLite
+     *
      * @return
      */
-    public String getSyncStatus(){
+    public String getSyncStatus() {
         String msg = null;
-        if(this.dbSyncCount() == 0){
+        if (this.dbSyncCount() == 0) {
             msg = "SQLite and Remote MySQL DBs are in Sync!";
-        }else{
-            msg = "DB Sync neededn";
+        } else {
+            msg = "DB Sync needed";
         }
         return msg;
     }
 
     /**
      * Get SQLite records that are yet to be Synced
+     *
      * @return
      */
-    public int dbSyncCount(){
+    public int dbSyncCount() {
         int count = 0;
-        String selectQuery = "SELECT  * FROM players where udpateStatus = '"+"no"+"'";
+        String selectQuery = "SELECT  * FROM players where udpateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         count = cursor.getCount();
         cursor.close();
@@ -184,14 +186,15 @@ public class DataSourcePlayer {
     }
 
     /**
-     * Update Sync status against each User ID
+     * Update Sync status against each Player ID
+     *
      * @param id
      * @param status
      */
-    public void updateSyncStatus(String id, String status){
+    public void updateSyncStatus(String id, String status) {
         open();
-        String updateQuery = "Update players set udpateStatus = '"+ status +"' where _id="+"'"+ id +"'";
-        Log.d("query",updateQuery);
+        String updateQuery = "Update players set udpateStatus = '" + status + "' where _id=" + "'" + id + "'";
+        Log.d("query", updateQuery);
         database.execSQL(updateQuery);
         database.close();
     }

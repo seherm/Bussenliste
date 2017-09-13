@@ -36,14 +36,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         dataSourcePlayer = new DataSourcePlayer(this);
-        dataSourcePlayer.open();
-        players = dataSourcePlayer.getAllPlayers();
 
-        if (players.isEmpty()) {
-            for (String name : getResources().getStringArray(R.array.players)) {
-                dataSourcePlayer.createPlayer(name);
-            }
-        }
+        setAllPlayers();
 
         GridView gridView = (GridView) findViewById(R.id.players);
         final PlayersAdapter playersAdapter = new PlayersAdapter(this, players);
@@ -56,6 +50,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    public void setAllPlayers() {
+        dataSourcePlayer.open();
+        players = dataSourcePlayer.getAllPlayers();
+
+        //First time-usage the players need to be created and filled into the SQLite DB
+        if (players.isEmpty()) {
+            for (String name : getResources().getStringArray(R.array.players)) {
+                dataSourcePlayer.createPlayer(name);
+            }
+            players = dataSourcePlayer.getAllPlayers();
+        }
         dataSourcePlayer.close();
     }
 
@@ -79,18 +87,24 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_sync) {
-            syncSQLiteMySQLDB();
+        switch (id) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_sync:
+                syncSQLiteMySQLDB();
+                break;
+            default:
+                return true;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
 
     public void syncSQLiteMySQLDB() {
+
+        String productionServerAddress = "https://bussenliste.000webhostapp.com/insertplayer.php";
+        String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
+
         //Create AsycHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -99,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         if (playerList.size() != 0) {
             if (dataSourcePlayer.dbSyncCount() != 0) {
                 params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
-                client.post("https://bussenliste.000webhostapp.com/insertplayer.php", params, new AsyncHttpResponseHandler() {
+                client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         System.out.println(responseBody);
@@ -128,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                         } else if (statusCode == 500) {
                             Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]" + statusCode, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -136,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(getApplicationContext(), "No data in SQLite DB, please do enter User name to perform Sync action", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
         }
     }
 

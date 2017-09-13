@@ -7,20 +7,18 @@ import java.util.ArrayList;
  * Created by sebas on 04.09.2017.
  */
 
-public class Player implements Serializable{
+public class Player implements Serializable {
 
     private long id;
     private String name;
     private ArrayList<Fine> fines;
     private int imageLayoutResourceId;
-    private String updateStatus;
 
 
-    public Player(long id, String name, String updateStatus) {
+    public Player(long id, String name) {
         this.id = id;
         this.name = name;
         this.fines = new ArrayList<>();
-        this.updateStatus = updateStatus;
     }
 
     public long getId() {
@@ -55,26 +53,18 @@ public class Player implements Serializable{
         this.imageLayoutResourceId = imageLayoutResourceId;
     }
 
-    public String getUpdateStatus() {
-        return updateStatus;
-    }
-
-    public void setUpdateStatus(String updateStatus) {
-        this.updateStatus = updateStatus;
-    }
-
-    public int getTotalSumOfFines(){
+    public int getTotalSumOfFines() {
         int totalSumOfFines = 0;
 
-        for (Fine fine:fines) {
+        for (Fine fine : fines) {
             totalSumOfFines += fine.getAmount();
         }
         return totalSumOfFines;
     }
 
-    public void addFine(FineType fineType){
+    public void addFine(FineType fineType) {
         Fine fine;
-        switch (fineType){
+        switch (fineType) {
             case VERSPÄTUNG:
                 fine = new Fine(FineType.VERSPÄTUNG, 5);
                 fines.add(fine);
