@@ -34,17 +34,10 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player_details);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("");
-
-        dataSource = new DataSource(this);
-
-        selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
-        TextView playerName = (TextView) findViewById(R.id.player_name);
-        playerName.setText(selectedPlayer.getName());
-        totalSumOfFines = (TextView) findViewById(R.id.total_sum_of_fines);
-        String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
-        totalSumOfFines.setText(fineAmount);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +46,14 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                 showFineSelectionDialog();
             }
         });
+
+        selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
+        TextView playerName = (TextView) findViewById(R.id.player_name);
+        playerName.setText(selectedPlayer.getName());
+
+        updateTotalSumOfFinesView();
+
+        dataSource = new DataSource(this);
 
         final ListView finesListView = (ListView) findViewById(R.id.finesListView);
         finesAdapter = new FinesAdapter(this, selectedPlayer.getFines());
@@ -116,7 +117,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         selectedItems = new ArrayList<>();
         dataSource.open();
-        List<Fine> allFines = dataSource.getAllFines();
+        final List<Fine> allFines = dataSource.getAllFines();
         dataSource.close();
         String[] namesStringArray = new String[allFines.size()];
         for (int i = 0; i < allFines.size(); i++) {
@@ -132,10 +133,10 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                                                 boolean isChecked) {
                                 if (isChecked) {
                                     // If the user checked the item, add it to the selected items
-                                    selectedItems.add(dataSource.getAllFines().get(which));
-                                } else if (selectedItems.contains(which)) {
+                                    selectedItems.add(allFines.get(which));
+                                } else if (selectedItems.contains(allFines.get(which))) {
                                     // Else, if the item is already in the array, remove it
-                                    selectedItems.remove(dataSource.getAllFines().get(which));
+                                    selectedItems.remove(allFines.get(which));
                                 }
                             }
                         });
@@ -145,14 +146,13 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                 for (Fine fine : selectedItems) {
                     selectedPlayer.addFine(fine);
                     finesAdapter.notifyDataSetChanged();
-                    totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
                 }
-
                 try {
                     dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                updateTotalSumOfFinesView();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
@@ -165,6 +165,14 @@ public class PlayerDetailsActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void updateTotalSumOfFinesView() {
+        if (totalSumOfFines == null) {
+            totalSumOfFines = (TextView) findViewById(R.id.total_sum_of_fines);
+        }
+        String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
+        totalSumOfFines.setText(fineAmount);
     }
 
 }

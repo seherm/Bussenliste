@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DbHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "bussenliste.db";
-    public static final int DB_VERSION = 9;
+    public static final int DB_VERSION = 1;
 
     public static final String TABLE_PLAYERS = "players";
 

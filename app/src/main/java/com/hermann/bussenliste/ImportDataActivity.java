@@ -56,7 +56,9 @@ public class ImportDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_import_data);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         listViewInternalStorage = (ListView) findViewById(R.id.lvInternalStorage);
         buttonUpDirectory = (Button) findViewById(R.id.btnUpDirectory);
@@ -75,9 +77,6 @@ public class ImportDataActivity extends AppCompatActivity {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
                     //Execute method for reading the excel data.
                     readExcelData(lastDirectory);
-
-
-
                 } else {
                     count++;
                     pathHistory.add(count, (String) adapterView.getItemAtPosition(i));
@@ -107,7 +106,7 @@ public class ImportDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 count = 0;
-                pathHistory = new ArrayList<String>();
+                pathHistory = new ArrayList<>();
                 pathHistory.add(count, System.getenv("EXTERNAL_STORAGE"));
                 Log.d(TAG, "buttonSDCard: " + pathHistory.get(count));
                 checkInternalStorage();
@@ -144,9 +143,7 @@ public class ImportDataActivity extends AppCompatActivity {
     }
 
     private StringBuilder createStringBuilder(XSSFSheet sheet, FormulaEvaluator formulaEvaluator) {
-
         int rowsCount = sheet.getPhysicalNumberOfRows();
-
         StringBuilder sb = new StringBuilder();
 
         //outter loop, loops through rows
@@ -172,7 +169,7 @@ public class ImportDataActivity extends AppCompatActivity {
 
         return sb;
     }
-    
+
     /**
      * Method for parsing imported data
      */
@@ -219,7 +216,7 @@ public class ImportDataActivity extends AppCompatActivity {
             //use try catch to make sure there are no "" that try to parse into doubles.
             try {
                 String description = columns[0];
-                int amount = Integer.parseInt(String.valueOf(columns[1].trim().charAt(0)));
+                int amount = (int) Double.parseDouble(columns[1].trim());
 
                 //add the the uploadData ArrayList
                 dataSource.open();
@@ -306,7 +303,7 @@ public class ImportDataActivity extends AppCompatActivity {
                 Log.d("Files", "FileName:" + listFile[i].getName());
             }
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, FilePathStrings);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilePathStrings);
             listViewInternalStorage.setAdapter(adapter);
 
         } catch (NullPointerException e) {
