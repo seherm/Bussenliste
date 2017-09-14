@@ -18,6 +18,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerDetailsActivity extends AppCompatActivity {
 
@@ -113,9 +114,16 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         selectedItems = new ArrayList<>();
         dataSource.open();
+        List<Fine> allFines = dataSource.getAllFines();
+        dataSource.close();
+        String[] namesStringArray = new String[allFines.size()];
+        for (int i = 0; i < allFines.size(); i++) {
+            namesStringArray[i] = allFines.get(i).getDescription();
+        }
+        dataSource.open();
         builder.setTitle(R.string.add_fair)
 
-                .setMultiChoiceItems(R.array.fines, null,
+                .setMultiChoiceItems(namesStringArray, null,
                         new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which,

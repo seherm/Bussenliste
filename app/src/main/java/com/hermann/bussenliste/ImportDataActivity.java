@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -46,7 +47,7 @@ public class ImportDataActivity extends AppCompatActivity {
     private int count = 0;
 
     private Button buttonUpDirectory, buttonSDCard;
-
+    private ProgressBar progressBar;
     private ListView listViewInternalStorage;
 
     @Override
@@ -55,10 +56,12 @@ public class ImportDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_import_data);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         listViewInternalStorage = (ListView) findViewById(R.id.lvInternalStorage);
         buttonUpDirectory = (Button) findViewById(R.id.btnUpDirectory);
         buttonSDCard = (Button) findViewById(R.id.btnViewSDCard);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         checkFilePermissions();
 
@@ -72,6 +75,8 @@ public class ImportDataActivity extends AppCompatActivity {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
                     //Execute method for reading the excel data.
                     readExcelData(lastDirectory);
+
+
 
                 } else {
                     count++;
@@ -113,6 +118,7 @@ public class ImportDataActivity extends AppCompatActivity {
     }
 
     private void readExcelData(String filePath) {
+        progressBar.setVisibility(View.VISIBLE);
         //Declare input file
         File inputFile = new File(filePath);
 
@@ -128,7 +134,7 @@ public class ImportDataActivity extends AppCompatActivity {
             StringBuilder stringBuilderFines = createStringBuilder(sheetFines, formulaEvaluator);
 
             parseStringBuilderPlayers(stringBuilderPlayers);
-            parseStringBuilder(stringBuilderFines);
+            parseStringBuilderFines(stringBuilderFines);
 
         } catch (FileNotFoundException e) {
             Log.e(TAG, "readExcelData: FileNotFoundException. " + e.getMessage());
@@ -173,7 +179,7 @@ public class ImportDataActivity extends AppCompatActivity {
 
 
     public void parseStringBuilderPlayers(StringBuilder mStringBuilder) {
-        Log.d(TAG, "parseStringBuilder: Started parsing.");
+        Log.d(TAG, "parseStringBuilderFines: Started parsing.");
 
         // splits the sb into rows.
         String[] rows = mStringBuilder.toString().split(":");
@@ -193,14 +199,14 @@ public class ImportDataActivity extends AppCompatActivity {
                 dataSource.close();
 
             } catch (NumberFormatException e) {
-                Log.e(TAG, "parseStringBuilder: NumberFormatException: " + e.getMessage());
+                Log.e(TAG, "parseStringBuilderFines: NumberFormatException: " + e.getMessage());
             }
         }
     }
 
 
-    public void parseStringBuilder(StringBuilder mStringBuilder) {
-        Log.d(TAG, "parseStringBuilder: Started parsing.");
+    public void parseStringBuilderFines(StringBuilder mStringBuilder) {
+        Log.d(TAG, "parseStringBuilderFines: Started parsing.");
 
         // splits the sb into rows.
         String[] rows = mStringBuilder.toString().split(":");
@@ -213,7 +219,7 @@ public class ImportDataActivity extends AppCompatActivity {
             //use try catch to make sure there are no "" that try to parse into doubles.
             try {
                 String description = columns[0];
-                int amount = Integer.parseInt(columns[1]);
+                int amount = Integer.parseInt(String.valueOf(columns[1].trim().charAt(0)));
 
                 //add the the uploadData ArrayList
                 dataSource.open();
@@ -221,9 +227,10 @@ public class ImportDataActivity extends AppCompatActivity {
                 dataSource.close();
 
             } catch (NumberFormatException e) {
-                Log.e(TAG, "parseStringBuilder: NumberFormatException: " + e.getMessage());
+                Log.e(TAG, "parseStringBuilderFines: NumberFormatException: " + e.getMessage());
             }
         }
+        progressBar.setVisibility(View.GONE);
     }
 
 

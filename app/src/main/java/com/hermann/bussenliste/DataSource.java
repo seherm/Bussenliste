@@ -174,8 +174,8 @@ public class DataSource {
     public List<Fine> getAllFines() {
         List<Fine> finesList = new ArrayList<>();
 
-        Cursor cursor = database.query(DbHelper.TABLE_PLAYERS,
-                columnsPlayers, null, null, null, null, null);
+        Cursor cursor = database.query(DbHelper.TABLE_FINES,
+                columsFines, null, null, null, null, null);
 
         cursor.moveToFirst();
         Fine fine;
