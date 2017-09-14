@@ -12,7 +12,6 @@ public class Player implements Serializable {
     private long id;
     private String name;
     private ArrayList<Fine> fines;
-    private int imageLayoutResourceId;
 
 
     public Player(long id, String name) {
@@ -45,14 +44,6 @@ public class Player implements Serializable {
         this.fines = fines;
     }
 
-    public int getImageLayoutResourceId() {
-        return imageLayoutResourceId;
-    }
-
-    public void setImageLayoutResourceId(int imageLayoutResourceId) {
-        this.imageLayoutResourceId = imageLayoutResourceId;
-    }
-
     public int getTotalSumOfFines() {
         int totalSumOfFines = 0;
 
@@ -62,23 +53,7 @@ public class Player implements Serializable {
         return totalSumOfFines;
     }
 
-    public void addFine(FineType fineType) {
-        Fine fine;
-        switch (fineType) {
-            case LATE_AT_THE_GAME:
-                fine = new Fine(FineType.LATE_AT_THE_GAME, 20, R.string.LATE_AT_THE_GAME );
-                fines.add(fine);
-                break;
-            case LATE_IN_TRAINING:
-                fine = new Fine(FineType.LATE_IN_TRAINING, 5, R.string.LATE_IN_TRAINING);
-                fines.add(fine);
-                break;
-            case FORGOT_THE_MATERIAL:
-                fine = new Fine(FineType.FORGOT_THE_MATERIAL, 5, R.string.FORGOT_THE_MATERIAL);
-                fines.add(fine);
-                break;
-            default:
-                break;
-        }
+    public void addFine(Fine fine){
+        fines.add(fine);
     }
 }

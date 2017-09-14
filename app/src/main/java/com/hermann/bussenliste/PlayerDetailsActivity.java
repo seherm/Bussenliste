@@ -21,10 +21,10 @@ import java.util.ArrayList;
 
 public class PlayerDetailsActivity extends AppCompatActivity {
 
-    private ArrayList selectedItems;
+    private ArrayList<Fine> selectedItems;
     private Player selectedPlayer;
     private FinesAdapter finesAdapter;
-    private DataSourcePlayer dataSourcePlayer;
+    private DataSource dataSource;
     private TextView totalSumOfFines;
 
     @Override
@@ -36,7 +36,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
-        dataSourcePlayer = new DataSourcePlayer(this);
+        dataSource = new DataSource(this);
 
         selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
         TextView playerName = (TextView) findViewById(R.id.player_name);
@@ -88,13 +88,13 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                             }
                         }
                         totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
-                        dataSourcePlayer.open();
+                        dataSource.open();
                         try {
-                            dataSourcePlayer.updatePlayer(selectedPlayer.getId(),selectedPlayer.getFines());
+                            dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        dataSourcePlayer.close();
+                        dataSource.close();
                         actionMode.finish();
                         return true;
                     default:
@@ -112,7 +112,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
     public void showFineSelectionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         selectedItems = new ArrayList<>();
-        dataSourcePlayer.open();
+        dataSource.open();
         builder.setTitle(R.string.add_fair)
 
                 .setMultiChoiceItems(R.array.fines, null,
@@ -122,38 +122,32 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                                                 boolean isChecked) {
                                 if (isChecked) {
                                     // If the user checked the item, add it to the selected items
-                                    selectedItems.add(which);
+                                    selectedItems.add(dataSource.getAllFines().get(which));
                                 } else if (selectedItems.contains(which)) {
                                     // Else, if the item is already in the array, remove it
-                                    selectedItems.remove(Integer.valueOf(which));
+                                    selectedItems.remove(dataSource.getAllFines().get(which));
                                 }
                             }
                         });
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                for (Object fine : selectedItems) {
-                    if (fine.equals(0)) {
-                        selectedPlayer.addFine(FineType.LATE_AT_THE_GAME);
-                        finesAdapter.notifyDataSetChanged();
-                        totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
-                    } else if (fine.equals(1)) {
-                        selectedPlayer.addFine(FineType.LATE_IN_TRAINING);
-                        finesAdapter.notifyDataSetChanged();
-                        totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
-                    } else {
-                        break;
-                    }
+                for (Fine fine : selectedItems) {
+                    selectedPlayer.addFine(fine);
+                    finesAdapter.notifyDataSetChanged();
+                    totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
                 }
 
                 try {
-                    dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
+                    dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+
+        {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel();
             }

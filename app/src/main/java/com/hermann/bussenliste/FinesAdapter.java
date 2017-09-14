@@ -55,7 +55,7 @@ public class FinesAdapter extends BaseAdapter {
         final TextView fineAmountTextView = (TextView) view.findViewById(R.id.fineAmount);
         final TextView fineTypeTextView = (TextView) view.findViewById(R.id.fineType);
         fineAmountTextView.setText(Integer.toString(fine.getAmount()) + " CHF");
-        fineTypeTextView.setText(fine.getDescriptionStringResourceId());
+        fineTypeTextView.setText(fine.getDescription());
 
         return view;
     }

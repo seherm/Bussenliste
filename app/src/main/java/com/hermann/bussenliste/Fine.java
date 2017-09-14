@@ -8,21 +8,25 @@ import java.io.Serializable;
 
 public class Fine implements Serializable{
 
-    private FineType type;
+    private long id;
+    private String description;
     private int amount;
-    private int descriptionStringResourceId;
 
-    public Fine(FineType type, int amount, int descriptionStringResourceId) {
-        this.type = type;
+    public Fine(long id, String description, int amount) {
+        this.id = id;
+        this.description = description;
         this.amount = amount;
-        this.descriptionStringResourceId = descriptionStringResourceId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getAmount() {
         return amount;
-    }
-
-    public int getDescriptionStringResourceId() {
-        return descriptionStringResourceId;
     }
 }

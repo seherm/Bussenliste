@@ -1,24 +1,44 @@
 package com.hermann.bussenliste;
 
+import android.Manifest;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -26,7 +46,7 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
 
     private List<Player> players;
-    private DataSourcePlayer dataSourcePlayer;
+    private DataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +55,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        dataSourcePlayer = new DataSourcePlayer(this);
-
-        setAllPlayers();
+        dataSource = new DataSource(this);
+        dataSource.open();
+        players = dataSource.getAllPlayers();
+        dataSource.close();
 
         GridView gridView = (GridView) findViewById(R.id.players);
         final PlayersAdapter playersAdapter = new PlayersAdapter(this, players);
@@ -53,24 +74,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setAllPlayers() {
-        dataSourcePlayer.open();
-        players = dataSourcePlayer.getAllPlayers();
+    /**public void setAllPlayers() {
+        dataSource.open();
+        players = dataSource.getAllPlayers();
 
         //First time-usage the players need to be created and filled into the SQLite DB
         if (players.isEmpty()) {
             for (String name : getResources().getStringArray(R.array.players)) {
-                dataSourcePlayer.createPlayer(name);
+                dataSource.createPlayer(name);
             }
-            players = dataSourcePlayer.getAllPlayers();
+            players = dataSource.getAllPlayers();
         }
-        dataSourcePlayer.close();
-    }
+        dataSource.close();
+    }**/
 
     public void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
         intent.putExtra("SelectedPlayer", selectedPlayer);
         startActivity(intent);
+    }
+
+    public void goToImportDataPage() {
+
     }
 
     @Override
@@ -89,7 +114,9 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_settings:
-                return true;
+                Intent intent = new Intent(this, ImportDataActivity.class);
+                startActivity(intent);
+                break;
             case R.id.action_sync:
                 syncSQLiteMySQLDB();
                 break;
@@ -108,11 +135,11 @@ public class MainActivity extends AppCompatActivity {
         //Create AsycHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        dataSourcePlayer.open();
-        List<Player> playerList = dataSourcePlayer.getAllPlayers();
+        dataSource.open();
+        List<Player> playerList = dataSource.getAllPlayers();
         if (playerList.size() != 0) {
-            if (dataSourcePlayer.dbSyncCount() != 0) {
-                params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
+            if (dataSource.dbSyncCount() != 0) {
+                params.put("playersJSON", dataSource.composeJSONfromSQLite());
                 client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -124,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject obj = (JSONObject) arr.get(i);
                                 System.out.println(obj.get("id"));
                                 System.out.println(obj.get("status"));
-                                dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                dataSource.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -153,5 +180,4 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
         }
     }
-
 }

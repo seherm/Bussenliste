@@ -11,6 +11,7 @@
     <string name="LATE_AT_THE_GAME">Verspätet am Spiel (ohne Meldung)</string>
     <string name="LATE_IN_TRAINING">Verspätet im Training (ohne Meldung)</string>
     <string name="FORGOT_THE_MATERIAL">Material in der Halle/Garderobe vergessen</string>
+    <string name="title_activity_import_data">Interner Speicher</string>
 
     <string-array name="fines">
         <item name="LATE_AT_THE_GAME">@string/LATE_AT_THE_GAME</item>
