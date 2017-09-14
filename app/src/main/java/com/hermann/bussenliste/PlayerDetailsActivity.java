@@ -43,7 +43,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         TextView playerName = (TextView) findViewById(R.id.player_name);
         playerName.setText(selectedPlayer.getName());
         totalSumOfFines = (TextView) findViewById(R.id.total_sum_of_fines);
-        totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
+        String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
+        totalSumOfFines.setText(fineAmount);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -88,7 +89,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                                 selectedPlayer.getFines().remove(selectedItem);
                             }
                         }
-                        totalSumOfFines.setText(Integer.toString(selectedPlayer.getTotalSumOfFines()) + " CHF");
+                        String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
+                        totalSumOfFines.setText(fineAmount);
                         dataSource.open();
                         try {
                             dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());

@@ -157,7 +157,7 @@ public class ImportDataActivity extends AppCompatActivity {
             for (int c = 0; c < cellsCount; c++) {
                 //handles if there are too many columns on the excel sheet.
                 if (c > 3) {
-                    Toast.makeText(this, "ERROR: Excel File Format is incorrect!", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, R.string.error_incorrect_excel_format, Toast.LENGTH_SHORT).show();
                     break;
                 } else {
                     String value = getCellAsString(row, c, formulaEvaluator);
@@ -280,7 +280,7 @@ public class ImportDataActivity extends AppCompatActivity {
         try {
             if (!Environment.getExternalStorageState().equals(
                     Environment.MEDIA_MOUNTED)) {
-                Toast.makeText(this, "No SD card found.", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "No SD card found.", Toast.LENGTH_SHORT).show();
             } else {
                 // Locate the image folder in your SD Car;d
                 file = new File(pathHistory.get(count));

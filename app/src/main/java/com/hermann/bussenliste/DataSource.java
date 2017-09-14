@@ -33,7 +33,7 @@ public class DataSource {
             DbHelper.COLUMN_UPDATE_STATUS
     };
 
-    private String[] columsFines = {
+    private String[] columnsFines = {
             DbHelper.COLUMN_ID,
             DbHelper.COLUMN_DESCRIPTION,
             DbHelper.COLUMN_AMOUNT,
@@ -147,7 +147,7 @@ public class DataSource {
         long insertId = database.insert(DbHelper.TABLE_FINES, null, values);
 
         Cursor cursor = database.query(DbHelper.TABLE_FINES,
-                columsFines, DbHelper.COLUMN_ID + "=" + insertId,
+                columnsFines, DbHelper.COLUMN_ID + "=" + insertId,
                 null, null, null, null);
 
         cursor.moveToFirst();
@@ -175,7 +175,7 @@ public class DataSource {
         List<Fine> finesList = new ArrayList<>();
 
         Cursor cursor = database.query(DbHelper.TABLE_FINES,
-                columsFines, null, null, null, null, null);
+                columnsFines, null, null, null, null, null);
 
         cursor.moveToFirst();
         Fine fine;
@@ -200,7 +200,7 @@ public class DataSource {
     public String composeJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM players where udpateStatus = '" + "no" + "'";
+        String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
@@ -238,7 +238,7 @@ public class DataSource {
      */
     public int dbSyncCount() {
         int count = 0;
-        String selectQuery = "SELECT  * FROM players where udpateStatus = '" + "no" + "'";
+        String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         count = cursor.getCount();
         cursor.close();
@@ -253,7 +253,7 @@ public class DataSource {
      */
     public void updateSyncStatus(String id, String status) {
         open();
-        String updateQuery = "Update players set udpateStatus = '" + status + "' where _id=" + "'" + id + "'";
+        String updateQuery = "Update players set updateStatus = '" + status + "' where _id=" + "'" + id + "'";
         Log.d("query", updateQuery);
         database.execSQL(updateQuery);
         database.close();

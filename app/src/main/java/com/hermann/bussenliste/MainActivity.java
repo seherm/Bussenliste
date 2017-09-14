@@ -70,32 +70,12 @@ public class MainActivity extends AppCompatActivity {
                 goToPlayerDetailsPage(selectedPlayer);
             }
         });
-
-
     }
-
-    /**public void setAllPlayers() {
-        dataSource.open();
-        players = dataSource.getAllPlayers();
-
-        //First time-usage the players need to be created and filled into the SQLite DB
-        if (players.isEmpty()) {
-            for (String name : getResources().getStringArray(R.array.players)) {
-                dataSource.createPlayer(name);
-            }
-            players = dataSource.getAllPlayers();
-        }
-        dataSource.close();
-    }**/
 
     public void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
         intent.putExtra("SelectedPlayer", selectedPlayer);
         startActivity(intent);
-    }
-
-    public void goToImportDataPage() {
-
     }
 
     @Override
