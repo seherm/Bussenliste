@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -56,10 +57,12 @@ public class FinesAdapter extends BaseAdapter {
 
         final TextView fineAmountTextView = (TextView) view.findViewById(R.id.fineAmount);
         final TextView fineTypeTextView = (TextView) view.findViewById(R.id.fineType);
+        final TextView fineDateTextView = (TextView) view.findViewById(R.id.date);
         String fineAmount = context.getString(R.string.fineAmount, fine.getAmount());
         fineAmountTextView.setText(fineAmount);
         fineTypeTextView.setText(fine.getDescription());
-
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm",Locale.GERMAN);
+        fineDateTextView.setText(sdf.format(fine.getDate()));
         return view;
     }
 

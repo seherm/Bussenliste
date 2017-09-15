@@ -3,6 +3,8 @@ package com.hermann.bussenliste;
 import android.Manifest;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +22,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ImportDataActivity extends AppCompatActivity {
 
@@ -76,7 +80,13 @@ public class ImportDataActivity extends AppCompatActivity {
                 if (lastDirectory.equals(adapterView.getItemAtPosition(i))) {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
                     //Execute method for reading the excel data.
-                    readExcelData(lastDirectory);
+                    progressBar.setVisibility(View.VISIBLE);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            readExcelData(lastDirectory);
+                        }
+                    }).start();
                 } else {
                     count++;
                     pathHistory.add(count, (String) adapterView.getItemAtPosition(i));
@@ -117,8 +127,8 @@ public class ImportDataActivity extends AppCompatActivity {
     }
 
     private void readExcelData(String filePath) {
-        progressBar.setVisibility(View.VISIBLE);
         //Declare input file
+
         File inputFile = new File(filePath);
 
         try {
@@ -140,6 +150,13 @@ public class ImportDataActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "readExcelData: Error reading inputstream. " + e.getMessage());
         }
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     private StringBuilder createStringBuilder(XSSFSheet sheet, FormulaEvaluator formulaEvaluator) {
@@ -227,7 +244,6 @@ public class ImportDataActivity extends AppCompatActivity {
                 Log.e(TAG, "parseStringBuilderFines: NumberFormatException: " + e.getMessage());
             }
         }
-        progressBar.setVisibility(View.GONE);
     }
 
 
@@ -253,7 +269,7 @@ public class ImportDataActivity extends AppCompatActivity {
                     if (HSSFDateUtil.isCellDateFormatted(cell)) {
                         double date = cellValue.getNumberValue();
                         SimpleDateFormat formatter =
-                                new SimpleDateFormat("MM/dd/yy");
+                                new SimpleDateFormat("dd/MM/yy", Locale.GERMAN);
                         value = formatter.format(HSSFDateUtil.getJavaDate(date));
                     } else {
                         value = "" + numericValue;

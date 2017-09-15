@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DbHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "bussenliste.db";
-    public static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 3;
 
     public static final String TABLE_PLAYERS = "players";
 
@@ -24,6 +24,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_AMOUNT = "amount";
+    public static final String COLUMN_DATE = "date";
 
     public static final String SQL_CREATE_TABLE_PLAYERS =
             "CREATE TABLE " + TABLE_PLAYERS +
@@ -33,7 +34,7 @@ public class DbHelper extends SQLiteOpenHelper {
     public static final String SQL_CREATE_TABLE_FINES =
             "CREATE TABLE " + TABLE_FINES +
                     "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_DESCRIPTION + " TEXT NOT NULL, " + COLUMN_AMOUNT + " INTEGER, " + COLUMN_UPDATE_STATUS + " TEXT);";
+                    COLUMN_DESCRIPTION + " TEXT NOT NULL, " + COLUMN_AMOUNT + " INTEGER, " + COLUMN_DATE + " TEXT, " + COLUMN_UPDATE_STATUS + " TEXT);";
 
 
     public DbHelper(Context context) {

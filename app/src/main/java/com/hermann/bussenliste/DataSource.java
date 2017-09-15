@@ -13,9 +13,12 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONException;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by sebas on 07.09.2017.
@@ -142,6 +145,7 @@ public class DataSource {
         ContentValues values = new ContentValues();
         values.put(DbHelper.COLUMN_DESCRIPTION, description);
         values.put(DbHelper.COLUMN_AMOUNT, amount);
+        values.put(DbHelper.COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN).format(new Date()));
         values.put(DbHelper.COLUMN_UPDATE_STATUS, "no");
 
         long insertId = database.insert(DbHelper.TABLE_FINES, null, values);
@@ -161,12 +165,15 @@ public class DataSource {
         int idIndex = cursor.getColumnIndex(DbHelper.COLUMN_ID);
         int idDescription = cursor.getColumnIndex(DbHelper.COLUMN_DESCRIPTION);
         int idAmount = cursor.getColumnIndex(DbHelper.COLUMN_AMOUNT);
+        int idDate = cursor.getColumnIndex(DbHelper.COLUMN_DATE);
 
         long id = cursor.getLong(idIndex);
         String description = cursor.getString(idDescription);
         int amount = cursor.getInt(idAmount);
+        String date = cursor.getString(idDate);
+        Date resultDate = new Date(date);
 
-        Fine fine = new Fine(id, description, amount);
+        Fine fine = new Fine(id, description, amount, resultDate);
 
         return fine;
     }
