@@ -8,7 +8,7 @@
     <string name="add_fair">Adding a new Fair</string>
     <string name="delete_text">Delete</string>
     <string name="action_sync">Sync</string>
-    <string name="fineAmount">%1$i USD</string>
+    <string name="fineAmount">%1$d USD</string>
 
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
 

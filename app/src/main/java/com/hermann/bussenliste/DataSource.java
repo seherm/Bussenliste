@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONException;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +41,7 @@ public class DataSource {
             DbHelper.COLUMN_ID,
             DbHelper.COLUMN_DESCRIPTION,
             DbHelper.COLUMN_AMOUNT,
+            DbHelper.COLUMN_DATE,
             DbHelper.COLUMN_UPDATE_STATUS
     };
 
@@ -171,7 +173,13 @@ public class DataSource {
         String description = cursor.getString(idDescription);
         int amount = cursor.getInt(idAmount);
         String date = cursor.getString(idDate);
-        Date resultDate = new Date(date);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
+        Date resultDate = null;
+        try {
+            resultDate = format.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         Fine fine = new Fine(id, description, amount, resultDate);
 
