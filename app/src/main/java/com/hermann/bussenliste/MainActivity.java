@@ -80,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void showImportDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Keine Spieler vorhanden");
-        builder.setMessage("Die Liste enthält keine Spieler. Möchtest du Spieler und Bussenliste importieren?");
+        builder.setTitle(R.string.no_players_available);
+        builder.setMessage(R.string.import_players_message);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -108,6 +108,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void goToSettingsPage(){
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -125,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.action_settings:
                 goToSettingsPage();
+                break;
             case R.id.action_sync:
                 syncSQLiteMySQLDB();
                 break;
@@ -135,9 +141,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void goToSettingsPage() {
-
-    }
 
     public void syncSQLiteMySQLDB() {
 
@@ -152,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         if (playerList.size() != 0) {
             if (dataSource.dbSyncCount() != 0) {
                 params.put("playersJSON", dataSource.composeJSONfromSQLite());
+                params.put("finesJSON", dataSource.composeJSONfromSQLite());
                 client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {

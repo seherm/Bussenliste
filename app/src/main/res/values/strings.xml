@@ -2,7 +2,7 @@
     <string name="app_name">Fineslist</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_player_details" translatable="false">PlayerDetailsActivity</string>
-    <string name="title_activity_import_data">Import Data</string>
+    <string name="title_activity_import_data">Select File</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_fair">Adding a new Fair</string>
@@ -12,6 +12,8 @@
 
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
     <string name="importing_files">Importing Data…</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="no_players_available">No Players available</string>
+    <string name="import_players_message">No players have been added yet. Would you like to select a file to import the players and fines?</string>
 
 </resources>
