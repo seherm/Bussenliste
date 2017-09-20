@@ -1,11 +1,11 @@
 package com.hermann.bussenliste;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -23,7 +22,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -38,21 +36,13 @@ import java.util.Locale;
 
 public class ImportDataActivity extends AppCompatActivity {
 
-    private DataSource dataSource;
-
     private static final String TAG = "ImportDataActivity";
-
-    private String[] FilePathStrings;
-    private String[] FileNameStrings;
-    private File[] listFile;
+    private DataSource dataSource;
     private File file;
-
     private ArrayList<String> pathHistory;
     private String lastDirectory;
     private int count = 0;
-
-    private Button buttonUpDirectory, buttonSDCard;
-    private ProgressBar progressBar;
+    private ProgressDialog progressDialog;
     private ListView listViewInternalStorage;
 
     @Override
@@ -61,14 +51,12 @@ public class ImportDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_import_data);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         listViewInternalStorage = (ListView) findViewById(R.id.lvInternalStorage);
-        buttonUpDirectory = (Button) findViewById(R.id.btnUpDirectory);
-        buttonSDCard = (Button) findViewById(R.id.btnViewSDCard);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        Button buttonUpDirectory = (Button) findViewById(R.id.btnUpDirectory);
+        Button buttonSDCard = (Button) findViewById(R.id.btnViewSDCard);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.importing_files));
 
         checkFilePermissions();
 
@@ -79,12 +67,9 @@ public class ImportDataActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 lastDirectory = pathHistory.get(count);
                 if (lastDirectory.equals(adapterView.getItemAtPosition(i))) {
-                    Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
+                    Log.d(TAG, "listViewInternalStorage: Selected a file for import: " + lastDirectory);
                     //Execute method for reading the excel data.
-                    //AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-                    //builder.setView(R.layout.import_files_dialog);
-                    //builder.show();
-                    progressBar.setVisibility(View.VISIBLE);
+                    progressDialog.show();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -132,7 +117,6 @@ public class ImportDataActivity extends AppCompatActivity {
 
     private void readExcelData(String filePath) {
         //Declare input file
-
         File inputFile = new File(filePath);
 
         try {
@@ -158,7 +142,7 @@ public class ImportDataActivity extends AppCompatActivity {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                progressBar.setVisibility(View.GONE);
+                progressDialog.dismiss();
             }
         });
     }
@@ -194,9 +178,7 @@ public class ImportDataActivity extends AppCompatActivity {
     /**
      * Method for parsing imported data
      */
-
-
-    public void parseStringBuilderPlayers(StringBuilder mStringBuilder) {
+    private void parseStringBuilderPlayers(StringBuilder mStringBuilder) {
         Log.d(TAG, "parseStringBuilderFines: Started parsing.");
 
         // splits the sb into rows.
@@ -211,7 +193,6 @@ public class ImportDataActivity extends AppCompatActivity {
             try {
                 String name = columns[0];
 
-                //add the the uploadData ArrayList
                 dataSource.open();
                 dataSource.createPlayer(name);
                 dataSource.close();
@@ -223,7 +204,7 @@ public class ImportDataActivity extends AppCompatActivity {
     }
 
 
-    public void parseStringBuilderFines(StringBuilder mStringBuilder) {
+    private void parseStringBuilderFines(StringBuilder mStringBuilder) {
         Log.d(TAG, "parseStringBuilderFines: Started parsing.");
 
         // splits the sb into rows.
@@ -239,7 +220,6 @@ public class ImportDataActivity extends AppCompatActivity {
                 String description = columns[0];
                 int amount = (int) Double.parseDouble(columns[1].trim());
 
-                //add the the uploadData ArrayList
                 dataSource.open();
                 dataSource.createFine(description, amount);
                 dataSource.close();
@@ -304,26 +284,26 @@ public class ImportDataActivity extends AppCompatActivity {
                 Log.d(TAG, "checkInternalStorage: directory path: " + pathHistory.get(count));
             }
 
-            listFile = file.listFiles();
+            File[] listFile = file.listFiles();
 
             // Create a String array for FilePathStrings
-            FilePathStrings = new String[listFile.length];
+            String[] filePathStrings = new String[listFile.length];
 
             // Create a String array for FileNameStrings
-            FileNameStrings = new String[listFile.length];
+            String[] fileNameStrings = new String[listFile.length];
 
             for (int i = 0; i < listFile.length; i++) {
                 // Get the path of the image file
-                FilePathStrings[i] = listFile[i].getAbsolutePath();
+                filePathStrings[i] = listFile[i].getAbsolutePath();
                 // Get the name image file
-                FileNameStrings[i] = listFile[i].getName();
+                fileNameStrings[i] = listFile[i].getName();
             }
 
             for (int i = 0; i < listFile.length; i++) {
                 Log.d("Files", "FileName:" + listFile[i].getName());
             }
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, FilePathStrings);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, filePathStrings);
             listViewInternalStorage.setAdapter(adapter);
 
         } catch (NullPointerException e) {

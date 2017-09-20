@@ -12,5 +12,6 @@
 
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
     <string name="importing_files">Importing Data…</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
 </resources>

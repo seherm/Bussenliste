@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_settings:
-                return true;
+                goToSettingsPage();
             case R.id.action_sync:
                 syncSQLiteMySQLDB();
                 break;
@@ -133,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goToSettingsPage() {
+
     }
 
     public void syncSQLiteMySQLDB() {
