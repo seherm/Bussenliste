@@ -81,9 +81,10 @@ public class ImportDataActivity extends AppCompatActivity {
                 if (lastDirectory.equals(adapterView.getItemAtPosition(i))) {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
                     //Execute method for reading the excel data.
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-                    builder.setView(R.layout.import_files_dialog);
-                    builder.show();
+                    //AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                    //builder.setView(R.layout.import_files_dialog);
+                    //builder.show();
+                    progressBar.setVisibility(View.VISIBLE);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {

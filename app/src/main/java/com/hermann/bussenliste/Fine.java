@@ -12,9 +12,9 @@ public class Fine implements Serializable{
     private long id;
     private String description;
     private int amount;
-    private Date date;
+    private String date;
 
-    public Fine(long id, String description, int amount, Date date) {
+    public Fine(long id, String description, int amount, String date) {
         this.id = id;
         this.description = description;
         this.amount = amount;
@@ -33,7 +33,7 @@ public class Fine implements Serializable{
         return amount;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 }

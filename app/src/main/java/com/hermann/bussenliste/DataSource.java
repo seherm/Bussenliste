@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONException;
 
 import java.lang.reflect.Type;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -147,7 +148,7 @@ public class DataSource {
         ContentValues values = new ContentValues();
         values.put(DbHelper.COLUMN_DESCRIPTION, description);
         values.put(DbHelper.COLUMN_AMOUNT, amount);
-        values.put(DbHelper.COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN).format(new Date()));
+        values.put(DbHelper.COLUMN_DATE, DateFormat.getDateInstance().format(new Date()));
         values.put(DbHelper.COLUMN_UPDATE_STATUS, "no");
 
         long insertId = database.insert(DbHelper.TABLE_FINES, null, values);
@@ -173,15 +174,7 @@ public class DataSource {
         String description = cursor.getString(idDescription);
         int amount = cursor.getInt(idAmount);
         String date = cursor.getString(idDate);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
-        Date resultDate = null;
-        try {
-            resultDate = format.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        Fine fine = new Fine(id, description, amount, resultDate);
+        Fine fine = new Fine(id, description, amount, date);
 
         return fine;
     }

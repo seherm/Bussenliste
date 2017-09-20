@@ -61,8 +61,7 @@ public class FinesAdapter extends BaseAdapter {
         String fineAmount = context.getString(R.string.fineAmount, fine.getAmount());
         fineAmountTextView.setText(fineAmount);
         fineTypeTextView.setText(fine.getDescription());
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm",Locale.GERMAN);
-        fineDateTextView.setText(sdf.format(fine.getDate()));
+        fineDateTextView.setText(fine.getDate());
         return view;
     }
 
