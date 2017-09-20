@@ -1,11 +1,13 @@
 package com.hermann.bussenliste;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -60,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         players = dataSource.getAllPlayers();
         dataSource.close();
 
+        if (players.isEmpty()){
+            showImportDialog();
+        }
+
         GridView gridView = (GridView) findViewById(R.id.players);
         final PlayersAdapter playersAdapter = new PlayersAdapter(this, players);
         gridView.setAdapter(playersAdapter);
@@ -72,9 +78,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void goToPlayerDetailsPage(Player selectedPlayer) {
+    private void showImportDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Keine Spieler vorhanden");
+        builder.setMessage("Die Liste enthält keine Spieler. Möchtest du Spieler und Bussenliste importieren?");
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                goToImportDataPage();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
         intent.putExtra("SelectedPlayer", selectedPlayer);
+        startActivity(intent);
+    }
+
+    private void goToImportDataPage(){
+        Intent intent = new Intent(this, ImportDataActivity.class);
         startActivity(intent);
     }
 
@@ -94,9 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_settings:
-                Intent intent = new Intent(this, ImportDataActivity.class);
-                startActivity(intent);
-                break;
+                return true;
             case R.id.action_sync:
                 syncSQLiteMySQLDB();
                 break;

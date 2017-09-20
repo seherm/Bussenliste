@@ -11,5 +11,6 @@
     <string name="fineAmount">%1$d USD</string>
 
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
+    <string name="importing_files">Importing Data…</string>
 
 </resources>

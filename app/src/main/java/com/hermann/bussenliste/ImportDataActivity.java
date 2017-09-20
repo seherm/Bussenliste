@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -80,7 +81,9 @@ public class ImportDataActivity extends AppCompatActivity {
                 if (lastDirectory.equals(adapterView.getItemAtPosition(i))) {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for upload: " + lastDirectory);
                     //Execute method for reading the excel data.
-                    progressBar.setVisibility(View.VISIBLE);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                    builder.setView(R.layout.import_files_dialog);
+                    builder.show();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {

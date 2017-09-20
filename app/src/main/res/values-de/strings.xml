@@ -10,4 +10,5 @@
     <string name="title_activity_import_data">Daten importieren</string>
     <string name="action_sync">Synchronisieren</string>
     <string name="error_incorrect_excel_format">Error: Excel Dateiformat ist nicht korrekt!</string>
+    <string name="importing_files">Daten werden importiert…</string>
 </resources>
