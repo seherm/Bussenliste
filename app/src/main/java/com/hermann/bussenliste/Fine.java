@@ -1,18 +1,13 @@
 package com.hermann.bussenliste;
 
 import java.io.Serializable;
-import java.util.Date;
 
-/**
- * Created by sebas on 05.09.2017.
- */
+public class Fine implements Serializable {
 
-public class Fine implements Serializable{
-
-    private long id;
-    private String description;
-    private int amount;
-    private String date;
+    private final long id;
+    private final String description;
+    private final int amount;
+    private final String date;
 
     public Fine(long id, String description, int amount, String date) {
         this.id = id;
@@ -21,9 +16,7 @@ public class Fine implements Serializable{
         this.date = date;
     }
 
-    public long getId() {
-        return id;
-    }
+    public long getId() { return id; }
 
     public String getDescription() {
         return description;

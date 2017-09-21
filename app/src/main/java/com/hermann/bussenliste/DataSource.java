@@ -14,31 +14,24 @@ import org.json.JSONException;
 
 import java.lang.reflect.Type;
 import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-
-/**
- * Created by sebas on 07.09.2017.
- */
 
 public class DataSource {
 
     private SQLiteDatabase database;
-    private DbHelper dbHelper;
+    private final DbHelper dbHelper;
 
-    private String[] columnsPlayers = {
+    private final String[] columnsPlayers = {
             DbHelper.COLUMN_ID,
             DbHelper.COLUMN_NAME,
             DbHelper.COLUMN_FINES,
             DbHelper.COLUMN_UPDATE_STATUS
     };
 
-    private String[] columnsFines = {
+    private final String[] columnsFines = {
             DbHelper.COLUMN_ID,
             DbHelper.COLUMN_DESCRIPTION,
             DbHelper.COLUMN_AMOUNT,
@@ -174,9 +167,8 @@ public class DataSource {
         String description = cursor.getString(idDescription);
         int amount = cursor.getInt(idAmount);
         String date = cursor.getString(idDate);
-        Fine fine = new Fine(id, description, amount, date);
 
-        return fine;
+        return new Fine(id, description, amount, date);
     }
 
     public List<Fine> getAllFines() {
@@ -200,11 +192,6 @@ public class DataSource {
     }
 
 
-    /**
-     * Compose JSON out of SQLite records
-     *
-     * @return
-     */
     public String composePlayersJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
@@ -212,7 +199,7 @@ public class DataSource {
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
-                HashMap<String, String> map = new HashMap<String, String>();
+                HashMap<String, String> map = new HashMap<>();
                 map.put("playerId", cursor.getString(0));
                 map.put("playerName", cursor.getString(1));
                 map.put("playerFines", cursor.getString(2));
@@ -231,7 +218,7 @@ public class DataSource {
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
-                HashMap<String, String> map = new HashMap<String, String>();
+                HashMap<String, String> map = new HashMap<>();
                 map.put("fineId", cursor.getString(0));
                 map.put("fineDescription", cursor.getString(1));
                 map.put("fineAmount", cursor.getString(2));
@@ -244,11 +231,6 @@ public class DataSource {
         return gson.toJson(wordList);
     }
 
-    /**
-     * Get Sync status of SQLite
-     *
-     * @return
-     */
     public String getSyncStatus() {
         String msg = null;
         if (this.dbSyncCount() == 0) {
@@ -259,11 +241,6 @@ public class DataSource {
         return msg;
     }
 
-    /**
-     * Get SQLite records that are yet to be Synced
-     *
-     * @return
-     */
     public int dbSyncCount() {
         int count = 0;
         String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
@@ -273,12 +250,6 @@ public class DataSource {
         return count;
     }
 
-    /**
-     * Update Sync status against each Player ID
-     *
-     * @param id
-     * @param status
-     */
     public void updateSyncStatus(String id, String status) {
         open();
         String updateQuery = "Update players set updateStatus = '" + status + "' where _id=" + "'" + id + "'";

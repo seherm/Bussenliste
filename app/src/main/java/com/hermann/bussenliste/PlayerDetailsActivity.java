@@ -113,7 +113,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         });
     }
 
-    public void showFineSelectionDialog() {
+    private void showFineSelectionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         selectedItems = new ArrayList<>();
         dataSource.open();
@@ -167,7 +167,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void updateTotalSumOfFinesView() {
+    private void updateTotalSumOfFinesView() {
         if (totalSumOfFines == null) {
             totalSumOfFines = (TextView) findViewById(R.id.total_sum_of_fines);
         }

@@ -3,14 +3,10 @@ package com.hermann.bussenliste;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * Created by sebas on 04.09.2017.
- */
-
 public class Player implements Serializable {
 
-    private long id;
-    private String name;
+    private final long id;
+    private final String name;
     private ArrayList<Fine> fines;
 
 
@@ -24,16 +20,8 @@ public class Player implements Serializable {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public ArrayList<Fine> getFines() {

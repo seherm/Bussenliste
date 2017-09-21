@@ -1,53 +1,32 @@
 package com.hermann.bussenliste;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<Player> players;
     private DataSource dataSource;
 
     @Override
@@ -59,10 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
         dataSource = new DataSource(this);
         dataSource.open();
-        players = dataSource.getAllPlayers();
+        List<Player> players = dataSource.getAllPlayers();
         dataSource.close();
 
-        if (players.isEmpty()){
+        if (players.isEmpty()) {
             showImportDialog();
         }
 
@@ -103,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void goToImportDataPage(){
+    private void goToImportDataPage() {
         Intent intent = new Intent(this, ImportDataActivity.class);
         startActivity(intent);
     }
 
-    private void goToSettingsPage(){
+    private void goToSettingsPage() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
@@ -143,12 +122,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void syncSQLiteMySQLDB() {
+    private void syncSQLiteMySQLDB() {
 
         String productionServerAddress = "https://bussenliste.000webhostapp.com/insertplayer.php";
         String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
 
-        //Create AsycHttpClient object
+        //Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         dataSource.open();
@@ -159,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        System.out.println(responseBody);
                         try {
                             JSONArray arr = new JSONArray(new String(responseBody));
                             System.out.println(arr.length());
@@ -171,21 +149,20 @@ public class MainActivity extends AppCompatActivity {
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
-                            // TODO Auto-generated catch block
-                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+
+                            Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                             e.printStackTrace();
                         }
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        // TODO Auto-generated method stub
                         if (statusCode == 404) {
                             Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
                         } else if (statusCode == 500) {
                             Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -198,12 +175,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void syncFines() {
+    private void syncFines() {
 
         String productionServerAddress = "https://bussenliste.000webhostapp.com/insertfine.php";
         String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
 
-        //Create AsycHttpClient object
+        //Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         dataSource.open();
@@ -214,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
                 client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        System.out.println(responseBody);
                         try {
                             JSONArray arr = new JSONArray(new String(responseBody));
                             System.out.println(arr.length());
@@ -226,21 +202,19 @@ public class MainActivity extends AppCompatActivity {
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
-                            // TODO Auto-generated catch block
-                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Error Occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                             e.printStackTrace();
                         }
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        // TODO Auto-generated method stub
                         if (statusCode == 404) {
                             Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
                         } else if (statusCode == 500) {
                             Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
                         }
                     }
                 });

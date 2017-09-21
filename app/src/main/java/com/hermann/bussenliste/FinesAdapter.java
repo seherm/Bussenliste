@@ -1,7 +1,6 @@
 package com.hermann.bussenliste;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,20 +8,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
-
-/**
- * Created by sebas on 05.09.2017.
- */
 
 public class FinesAdapter extends BaseAdapter {
 
-
     private final ArrayList<Fine> fines;
     private final Context context;
-    private SparseBooleanArray mSelectedItemsIds;
+    private final SparseBooleanArray mSelectedItemsIds;
 
     public FinesAdapter(Context context, ArrayList<Fine> fines) {
         this.fines = fines;
@@ -46,23 +38,23 @@ public class FinesAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(int i, View convertView, ViewGroup parent) {
 
         final Fine fine = fines.get(i);
 
-        if (view == null) {
+        if (convertView == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view = layoutInflater.inflate(R.layout.fine_list_item_layout, null);
+            convertView = layoutInflater.inflate(R.layout.fine_list_item_layout, parent, false);
         }
 
-        final TextView fineAmountTextView = (TextView) view.findViewById(R.id.fineAmount);
-        final TextView fineTypeTextView = (TextView) view.findViewById(R.id.fineType);
-        final TextView fineDateTextView = (TextView) view.findViewById(R.id.date);
+        final TextView fineAmountTextView = (TextView) convertView.findViewById(R.id.fineAmount);
+        final TextView fineTypeTextView = (TextView) convertView.findViewById(R.id.fineType);
+        final TextView fineDateTextView = (TextView) convertView.findViewById(R.id.date);
         String fineAmount = context.getString(R.string.fineAmount, fine.getAmount());
         fineAmountTextView.setText(fineAmount);
         fineTypeTextView.setText(fine.getDescription());
         fineDateTextView.setText(fine.getDate());
-        return view;
+        return convertView;
     }
 
     public void remove(Fine fine) {
@@ -71,7 +63,7 @@ public class FinesAdapter extends BaseAdapter {
 
     private void selectView(int position, boolean value) {
         if (value)
-            mSelectedItemsIds.put(position, value);
+            mSelectedItemsIds.put(position, true);
         else
             mSelectedItemsIds.delete(position);
         notifyDataSetChanged();

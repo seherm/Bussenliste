@@ -4,11 +4,11 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -69,11 +69,11 @@ public class ImportDataActivity extends AppCompatActivity {
                 lastDirectory = pathHistory.get(count);
                 if (lastDirectory.equals(adapterView.getItemAtPosition(i))) {
                     Log.d(TAG, "listViewInternalStorage: Selected a file for import: " + lastDirectory);
-                    //Execute method for reading the excel data.
                     progressDialog.show();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            //Execute method for reading the excel data.
                             readExcelData(lastDirectory);
                         }
                     }).start();
@@ -118,8 +118,6 @@ public class ImportDataActivity extends AppCompatActivity {
 
     /**
      * reads the excel file columns then rows. Stores data as player or fine object
-     *
-     * @return
      */
     private void readExcelData(String filePath) {
         //Declare input file
@@ -163,7 +161,7 @@ public class ImportDataActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             Log.e(TAG, "readExcelData: FileNotFoundException. " + e.getMessage());
         } catch (IOException e) {
-            Log.e(TAG, "readExcelData: Error reading inputstream. " + e.getMessage());
+            Log.e(TAG, "readExcelData: Error reading InputStream. " + e.getMessage());
         }
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -184,9 +182,9 @@ public class ImportDataActivity extends AppCompatActivity {
         String[] rows = stringBuilder.toString().split(":");
 
         //Create the players row by row
-        for (int i = 0; i < rows.length; i++) {
+        for (String row : rows) {
             //Split the columns of the rows
-            String[] columns = rows[i].split(",");
+            String[] columns = row.split(",");
 
             //use try catch to make sure there are no "" that try to parse into doubles.
             try {
@@ -209,11 +207,6 @@ public class ImportDataActivity extends AppCompatActivity {
 
     /**
      * Returns the cell as a string from the excel file
-     *
-     * @param row
-     * @param c
-     * @param formulaEvaluator
-     * @return
      */
     private String getCellAsString(Row row, int c, FormulaEvaluator formulaEvaluator) {
         String value = "";
@@ -275,8 +268,8 @@ public class ImportDataActivity extends AppCompatActivity {
                 fileNameStrings[i] = listFile[i].getName();
             }
 
-            for (int i = 0; i < listFile.length; i++) {
-                Log.d("Files", "FileName:" + listFile[i].getName());
+            for (File aListFile : listFile) {
+                Log.d("Files", "FileName:" + aListFile.getName());
             }
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, filePathStrings);

@@ -26,8 +26,11 @@
         <activity
             android:name=".PlayerDetailsActivity"
             android:label="@string/title_activity_player_details"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hermann.bussenliste.MainActivity" />
+        </activity>
         <activity
             android:name=".ImportDataActivity"
             android:label="@string/title_activity_import_data"
@@ -35,8 +38,11 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/BussenlisteTheme.NoActionBar"/>
+            android:theme="@style/BussenlisteTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hermann.bussenliste.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
