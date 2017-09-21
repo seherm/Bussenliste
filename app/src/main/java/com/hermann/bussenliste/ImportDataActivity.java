@@ -2,6 +2,7 @@ package com.hermann.bussenliste;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -115,6 +116,11 @@ public class ImportDataActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * reads the excel file columns then rows. Stores data as player or fine object
+     *
+     * @return
+     */
     private void readExcelData(String filePath) {
         //Declare input file
         File inputFile = new File(filePath);
@@ -122,114 +128,84 @@ public class ImportDataActivity extends AppCompatActivity {
         try {
             InputStream inputStream = new FileInputStream(inputFile);
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-            XSSFSheet sheetPlayers = workbook.getSheetAt(0);
-            XSSFSheet sheetFines = workbook.getSheetAt(1);
+            int numberOfSheets = workbook.getNumberOfSheets();
 
-            FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            //Creates for every Sheet a StringBuilder object
+            for (int i = 0; i < numberOfSheets; i++) {
+                XSSFSheet sheet = workbook.getSheetAt(i);
+                int rowsCount = sheet.getPhysicalNumberOfRows();
+                FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+                StringBuilder stringBuilder = new StringBuilder();
 
-            StringBuilder stringBuilderPlayers = createStringBuilder(sheetPlayers, formulaEvaluator);
-            StringBuilder stringBuilderFines = createStringBuilder(sheetFines, formulaEvaluator);
-
-            parseStringBuilderPlayers(stringBuilderPlayers);
-            parseStringBuilderFines(stringBuilderFines);
+                //outer loop, loops through rows
+                for (int r = 1; r < rowsCount; r++) {
+                    Row row = sheet.getRow(r);
+                    int cellsCount = row.getPhysicalNumberOfCells();
+                    //inner loop, loops through columns
+                    for (int c = 0; c < cellsCount; c++) {
+                        //handles if there are too many columns on the excel sheet.
+                        if (i == 0 && c > 2 || i == 1 && c > 3) {
+                            Toast.makeText(this, R.string.error_incorrect_excel_format, Toast.LENGTH_SHORT).show();
+                            break;
+                        } else {
+                            String value = getCellAsString(row, c, formulaEvaluator);
+                            String cellInfo = "r:" + r + "; c:" + c + "; v:" + value;
+                            Log.d(TAG, "readExcelData: Data from row: " + cellInfo);
+                            stringBuilder.append(value).append(", ");
+                        }
+                    }
+                    stringBuilder.append(":");
+                }
+                Log.d(TAG, "readExcelData: StringBuilder: " + stringBuilder.toString());
+                parseStringBuilder(stringBuilder, i);
+            }
 
         } catch (FileNotFoundException e) {
             Log.e(TAG, "readExcelData: FileNotFoundException. " + e.getMessage());
         } catch (IOException e) {
             Log.e(TAG, "readExcelData: Error reading inputstream. " + e.getMessage());
         }
-
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 progressDialog.dismiss();
+                goToMainPage();
             }
         });
-    }
-
-    private StringBuilder createStringBuilder(XSSFSheet sheet, FormulaEvaluator formulaEvaluator) {
-        int rowsCount = sheet.getPhysicalNumberOfRows();
-        StringBuilder sb = new StringBuilder();
-
-        //outter loop, loops through rows
-        for (int r = 1; r < rowsCount; r++) {
-            Row row = sheet.getRow(r);
-            int cellsCount = row.getPhysicalNumberOfCells();
-            //inner loop, loops through columns
-            for (int c = 0; c < cellsCount; c++) {
-                //handles if there are too many columns on the excel sheet.
-                if (c > 3) {
-                    Toast.makeText(this, R.string.error_incorrect_excel_format, Toast.LENGTH_SHORT).show();
-                    break;
-                } else {
-                    String value = getCellAsString(row, c, formulaEvaluator);
-                    String cellInfo = "r:" + r + "; c:" + c + "; v:" + value;
-                    Log.d("READ_EXCEL", "readExcelData: Data from row: " + cellInfo);
-                    sb.append(value + ", ");
-                }
-            }
-            sb.append(":");
-        }
-        Log.d(TAG, "readExcelData: STRINGBUILDER: " + sb.toString());
-
-        return sb;
     }
 
     /**
      * Method for parsing imported data
      */
-    private void parseStringBuilderPlayers(StringBuilder mStringBuilder) {
-        Log.d(TAG, "parseStringBuilderFines: Started parsing.");
+    private void parseStringBuilder(StringBuilder stringBuilder, int sheetIndex) {
+        Log.d(TAG, "parseStringBuilder: Started parsing.");
 
         // splits the sb into rows.
-        String[] rows = mStringBuilder.toString().split(":");
+        String[] rows = stringBuilder.toString().split(":");
 
-        //Add to the ArrayList<XYValue> row by row
+        //Create the players row by row
         for (int i = 0; i < rows.length; i++) {
             //Split the columns of the rows
             String[] columns = rows[i].split(",");
 
             //use try catch to make sure there are no "" that try to parse into doubles.
             try {
-                String name = columns[0];
-
                 dataSource.open();
-                dataSource.createPlayer(name);
+                if (sheetIndex == 0) {
+                    String name = columns[0];
+                    dataSource.createPlayer(name);
+                } else {
+                    String description = columns[0];
+                    int amount = (int) Double.parseDouble(columns[1].trim());
+                    dataSource.createFine(description, amount);
+                }
                 dataSource.close();
 
             } catch (NumberFormatException e) {
-                Log.e(TAG, "parseStringBuilderFines: NumberFormatException: " + e.getMessage());
+                Log.e(TAG, "parseStringBuilder: NumberFormatException: " + e.getMessage());
             }
         }
     }
-
-
-    private void parseStringBuilderFines(StringBuilder mStringBuilder) {
-        Log.d(TAG, "parseStringBuilderFines: Started parsing.");
-
-        // splits the sb into rows.
-        String[] rows = mStringBuilder.toString().split(":");
-
-        //Add to the ArrayList<XYValue> row by row
-        for (int i = 0; i < rows.length; i++) {
-            //Split the columns of the rows
-            String[] columns = rows[i].split(",");
-
-            //use try catch to make sure there are no "" that try to parse into doubles.
-            try {
-                String description = columns[0];
-                int amount = (int) Double.parseDouble(columns[1].trim());
-
-                dataSource.open();
-                dataSource.createFine(description, amount);
-                dataSource.close();
-
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "parseStringBuilderFines: NumberFormatException: " + e.getMessage());
-            }
-        }
-    }
-
 
     /**
      * Returns the cell as a string from the excel file
@@ -307,10 +283,13 @@ public class ImportDataActivity extends AppCompatActivity {
             listViewInternalStorage.setAdapter(adapter);
 
         } catch (NullPointerException e) {
-            Log.e(TAG, "checkInternalStorage: NULLPOINTEREXCEPTION " + e.getMessage());
+            Log.e(TAG, "checkInternalStorage: NullPointerException " + e.getMessage());
         }
     }
 
+    private void goToMainPage(){
+        startActivity(new Intent(this,MainActivity.class));
+    }
 
     private void checkFilePermissions() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
@@ -320,7 +299,7 @@ public class ImportDataActivity extends AppCompatActivity {
                 this.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1001); //Any number
             }
         } else {
-            Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
+            Log.d(TAG, "checkFilePermissions: No need to check permissions. SDK version < LOLLIPOP.");
         }
     }
 }
