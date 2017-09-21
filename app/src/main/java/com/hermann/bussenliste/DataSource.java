@@ -205,7 +205,7 @@ public class DataSource {
      *
      * @return
      */
-    public String composeJSONfromSQLite() {
+    public String composePlayersJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
         String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
@@ -216,6 +216,26 @@ public class DataSource {
                 map.put("playerId", cursor.getString(0));
                 map.put("playerName", cursor.getString(1));
                 map.put("playerFines", cursor.getString(2));
+                wordList.add(map);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(wordList);
+    }
+
+    public String composeFinesJSONfromSQLite() {
+        ArrayList<HashMap<String, String>> wordList;
+        wordList = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM fines where updateStatus = '" + "no" + "'";
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("fineId", cursor.getString(0));
+                map.put("fineDescription", cursor.getString(1));
+                map.put("fineAmount", cursor.getString(2));
+                map.put("fineDate", cursor.getString(3));
                 wordList.add(map);
             } while (cursor.moveToNext());
         }

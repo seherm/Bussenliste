@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.action_sync:
                 syncSQLiteMySQLDB();
+                syncFines();
                 break;
             default:
                 return true;
@@ -154,8 +155,62 @@ public class MainActivity extends AppCompatActivity {
         List<Player> playerList = dataSource.getAllPlayers();
         if (playerList.size() != 0) {
             if (dataSource.dbSyncCount() != 0) {
-                params.put("playersJSON", dataSource.composeJSONfromSQLite());
-                params.put("finesJSON", dataSource.composeJSONfromSQLite());
+                params.put("playersJSON", dataSource.composePlayersJSONfromSQLite());
+                client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        System.out.println(responseBody);
+                        try {
+                            JSONArray arr = new JSONArray(new String(responseBody));
+                            System.out.println(arr.length());
+                            for (int i = 0; i < arr.length(); i++) {
+                                JSONObject obj = (JSONObject) arr.get(i);
+                                System.out.println(obj.get("id"));
+                                System.out.println(obj.get("status"));
+                                dataSource.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                            }
+                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            // TODO Auto-generated catch block
+                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        // TODO Auto-generated method stub
+                        if (statusCode == 404) {
+                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                        } else if (statusCode == 500) {
+                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    public void syncFines() {
+
+        String productionServerAddress = "https://bussenliste.000webhostapp.com/insertfine.php";
+        String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
+
+        //Create AsycHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        dataSource.open();
+        List<Fine> finesList = dataSource.getAllFines();
+        if (finesList.size() != 0) {
+            if (dataSource.dbSyncCount() != 0) {
+                params.put("finesJSON", dataSource.composeFinesJSONfromSQLite());
                 client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
