@@ -5,6 +5,6 @@
     <color name="colorAccent">#4caf50</color>
     <color name="primary_text_material_light">#212121</color>
     <color name="secondary_text_material_light">#757575</color>
-    <color name="action_mode_background">#757575</color>
+    <color name="action_mode_background">#0277BD</color>
     <color name="row_activated">#E0E0E0</color>
 </resources>
