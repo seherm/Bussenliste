@@ -13,6 +13,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -21,12 +23,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
+    private static final String TEST_SERVER_ADDRESS = "http://192.168.0.101:80/sqlitemysqlsync/";
     private DataSource dataSource;
 
     @Override
@@ -64,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                goToImportDataPage();
+                //goToImportDataPage();
+                syncMySQLSQLiteDB();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -123,10 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void syncSQLiteMySQLDB() {
-
-        String productionServerAddress = "https://bussenliste.000webhostapp.com/insertplayer.php";
-        String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
-
         //Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -135,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         if (playerList.size() != 0) {
             if (dataSource.dbSyncCount() != 0) {
                 params.put("playersJSON", dataSource.composePlayersJSONfromSQLite());
-                client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
+                client.post(PRODUCTION_SERVER_ADDRESS + "insertplayer.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         try {
@@ -176,10 +179,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void syncFines() {
-
-        String productionServerAddress = "https://bussenliste.000webhostapp.com/insertfine.php";
-        String testServerAddress = "http://192.168.0.101:80/sqlitemysqlsync/insertplayer.php";
-
         //Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -188,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         if (finesList.size() != 0) {
             if (dataSource.dbSyncCount() != 0) {
                 params.put("finesJSON", dataSource.composeFinesJSONfromSQLite());
-                client.post(productionServerAddress, params, new AsyncHttpResponseHandler() {
+                client.post(PRODUCTION_SERVER_ADDRESS + "insertfine.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         try {
@@ -224,5 +223,98 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
         }
+    }
+
+
+
+    // Method to Sync MySQL to SQLite DB
+    public void syncMySQLSQLiteDB() {
+        // Create AsyncHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        // Http Request Params Object
+        RequestParams params = new RequestParams();
+        // Show ProgressBar
+        // Make Http call to getplayers.php
+        client.post(PRODUCTION_SERVER_ADDRESS + "getplayers.php", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                // Update SQLite DB with response sent by getplayers.php
+                updateSQLite(new String(responseBody));
+            }
+            // When error occurred
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                } else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    public void updateSQLite(String response){
+        ArrayList<HashMap<String, String>> playersSyncList = new ArrayList<>();
+        // Create GSON object
+        Gson gson = new GsonBuilder().create();
+        try {
+            // Extract JSON array from the response
+            JSONArray arr = new JSONArray(response);
+            System.out.println(arr.length());
+            // If no of array elements is not zero
+            if(arr.length() != 0){
+                // Loop through each array element, get JSON object which has userid and username
+                for (int i = 0; i < arr.length(); i++) {
+                    // Get JSON object
+                    JSONObject obj = (JSONObject) arr.get(i);
+                    //System.out.println(obj.get("userId"));
+                    //System.out.println(obj.get("userName"));
+                    // DB QueryValues Object to insert into SQLite
+                    //queryValues = new HashMap<String, String>();
+                    // Add userID extracted from Object
+                    //queryValues.put("userId", obj.get("userId").toString());
+                    // Add userName extracted from Object
+                    //queryValues.put("userName", obj.get("userName").toString());
+                    // Insert User into SQLite DB
+                    dataSource.open();
+                    dataSource.createPlayer(obj.get("playerName").toString());
+                    dataSource.close();
+                    HashMap<String, String> map = new HashMap<>();
+                    // Add status for each User in Hashmap
+                    map.put("Id", obj.get("playerId").toString());
+                    map.put("status", "1");
+                    playersSyncList.add(map);
+                }
+                // Inform Remote MySQL DB about the completion of Sync activity by passing Sync status of Users
+                updateMySQLSyncSts(gson.toJson(playersSyncList));
+                // Reload the Main Activity
+                this.recreate();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to inform remote MySQL DB about completion of Sync activity
+    public void updateMySQLSyncSts(String json) {
+        System.out.println(json);
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("syncsts", json);
+        // Make Http call to updatesyncsts.php with JSON parameter which has Sync statuses of Users
+        client.post(PRODUCTION_SERVER_ADDRESS + "updatesyncsts.php", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Toast.makeText(getApplicationContext(),	"MySQL DB has been informed about Sync activity", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Toast.makeText(getApplicationContext(), "Error Occured", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
