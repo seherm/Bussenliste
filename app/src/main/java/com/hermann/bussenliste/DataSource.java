@@ -185,25 +185,33 @@ public class DataSource {
             finesList.add(fine);
             cursor.moveToNext();
         }
-
         cursor.close();
 
         return finesList;
     }
 
 
-    public String composePlayersJSONfromSQLite() {
+    public String composeJSONfromSQLite(String tableName) {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
+        String selectQuery = "SELECT  * FROM " + tableName + " where updateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("playerId", cursor.getString(0));
-                map.put("playerName", cursor.getString(1));
-                map.put("playerFines", cursor.getString(2));
-                wordList.add(map);
+                if (tableName.equals(DbHelper.TABLE_PLAYERS)) {
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    map.put("playerId", cursor.getString(0));
+                    map.put("playerName", cursor.getString(1));
+                    map.put("playerFines", cursor.getString(2));
+                    wordList.add(map);
+                } else {
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    map.put("fineId", cursor.getString(0));
+                    map.put("fineDescription", cursor.getString(1));
+                    map.put("fineAmount", cursor.getString(2));
+                    map.put("fineDate", cursor.getString(2));
+                    wordList.add(map);
+                }
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -211,48 +219,18 @@ public class DataSource {
         return gson.toJson(wordList);
     }
 
-    public String composeFinesJSONfromSQLite() {
-        ArrayList<HashMap<String, String>> wordList;
-        wordList = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM fines where updateStatus = '" + "no" + "'";
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            do {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("fineId", cursor.getString(0));
-                map.put("fineDescription", cursor.getString(1));
-                map.put("fineAmount", cursor.getString(2));
-                map.put("fineDate", cursor.getString(3));
-                wordList.add(map);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        Gson gson = new GsonBuilder().create();
-        return gson.toJson(wordList);
-    }
-
-    public String getSyncStatus() {
-        String msg = null;
-        if (this.dbSyncCount() == 0) {
-            msg = "SQLite and Remote MySQL DBs are in Sync!";
-        } else {
-            msg = "DB Sync needed";
-        }
-        return msg;
-    }
-
-    public int dbSyncCount() {
+    public int dbSyncCount(String tableName) {
         int count = 0;
-        String selectQuery = "SELECT  * FROM players where updateStatus = '" + "no" + "'";
+        String selectQuery = "SELECT  * FROM " + tableName + " where updateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         count = cursor.getCount();
         cursor.close();
         return count;
     }
 
-    public void updateSyncStatus(String id, String status) {
+    public void updateSyncStatus(String tableName, String id, String status) {
         open();
-        String updateQuery = "Update players set updateStatus = '" + status + "' where _id=" + "'" + id + "'";
+        String updateQuery = "Update " + tableName + " set updateStatus = '" + status + "' where _id=" + "'" + id + "'";
         Log.d("query", updateQuery);
         database.execSQL(updateQuery);
         database.close();
