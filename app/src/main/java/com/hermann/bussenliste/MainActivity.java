@@ -1,5 +1,6 @@
 package com.hermann.bussenliste;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -23,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +35,11 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
 
     private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
-    private static final String TEST_SERVER_ADDRESS = "http://192.168.0.101:80/sqlitemysqlsync/";
+    //private static final String TEST_SERVER_ADDRESS = "http://192.168.0.101:80/sqlitemysqlsync/";
     private DataSource dataSource;
+    List<Player> players;
+    List<Fine> fines;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +48,22 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Transferring Data from Remote MySQL DB and Syncing SQLite. Please wait...");
+        progressDialog.setCancelable(false);
+
+
         dataSource = new DataSource(this);
         dataSource.open();
-        List<Player> players = dataSource.getAllPlayers();
+        players = dataSource.getAllPlayers();
+        fines = dataSource.getAllFines();
         dataSource.close();
 
-        if (players.isEmpty()) {
-            showImportDialog();
+        if (noPlayers() || noFines()) {
+            showImportDataDialog();
         }
 
+        //initialize players view
         GridView gridView = (GridView) findViewById(R.id.players);
         final PlayersAdapter playersAdapter = new PlayersAdapter(this, players);
         gridView.setAdapter(playersAdapter);
@@ -63,14 +76,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showImportDialog() {
+    private boolean noPlayers() {
+        return players.isEmpty();
+    }
+
+    private boolean noFines() {
+        return fines.isEmpty();
+    }
+
+    private void showImportDataDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.no_players_available);
         builder.setMessage(R.string.import_players_message);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //goToImportDataPage();
                 syncMySQLSQLiteDB();
             }
         });
@@ -129,26 +149,27 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void syncSQLiteMySQLDB() {
-        //Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
+
         dataSource.open();
         List<Player> playerList = dataSource.getAllPlayers();
-        List<Fine> fines = dataSource.getAllFines();
+        progressDialog.setMessage("Synching SQLite Data with Remote MySQL DB. Please wait...");
+        progressDialog.setCancelable(false);
+
         if (playerList.size() != 0) {
-            if (dataSource.dbSyncCount(DbHelper.TABLE_PLAYERS) != 0) {
-                params.put("playersJSON", dataSource.composeJSONfromSQLite(DbHelper.TABLE_PLAYERS));
+            if (dataSource.dbSyncCount(DatabaseHelper.TABLE_PLAYERS) != 0) {
+                progressDialog.show();
+                params.put("playersJSON", dataSource.composeJSONfromSQLite(DatabaseHelper.TABLE_PLAYERS));
                 client.post(PRODUCTION_SERVER_ADDRESS + "insertplayer.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         try {
+                            progressDialog.hide();
                             JSONArray arr = new JSONArray(new String(responseBody));
-                            System.out.println(arr.length());
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
-                                System.out.println(obj.get("id"));
-                                System.out.println(obj.get("status"));
-                                dataSource.updateSyncStatus(DbHelper.TABLE_PLAYERS, obj.get("id").toString(), obj.get("status").toString());
+                                dataSource.updateSyncStatus(DatabaseHelper.TABLE_PLAYERS, obj.get("id").toString(), obj.get("status").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -168,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-            } else if (dataSource.dbSyncCount(DbHelper.TABLE_FINES) != 0) {
-                params.put("finesJSON", dataSource.composeJSONfromSQLite(DbHelper.TABLE_FINES));
+            } else if (dataSource.dbSyncCount(DatabaseHelper.TABLE_FINES) != 0) {
+                params.put("finesJSON", dataSource.composeJSONfromSQLite(DatabaseHelper.TABLE_FINES));
                 client.post(PRODUCTION_SERVER_ADDRESS + "insertfine.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -180,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject obj = (JSONObject) arr.get(i);
                                 System.out.println(obj.get("id"));
                                 System.out.println(obj.get("status"));
-                                dataSource.updateSyncStatus(DbHelper.TABLE_FINES, obj.get("id").toString(), obj.get("status").toString());
+                                dataSource.updateSyncStatus(DatabaseHelper.TABLE_FINES, obj.get("id").toString(), obj.get("status").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -210,19 +231,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Method to Sync MySQL to SQLite DB
+    // Method to Sync online MySQL DB with local SQLite DB
     public void syncMySQLSQLiteDB() {
-        // Create AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
-        // Http Request Params Object
         RequestParams params = new RequestParams();
-        // Show ProgressBar
+        progressDialog.show();
         // Make Http call to getplayers.php
         client.post(PRODUCTION_SERVER_ADDRESS + "getplayers.php", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Update SQLite DB with response sent by getplayers.php
-                updateSQLite(new String(responseBody));
+                progressDialog.hide();
+                updatePlayersSQLite(new String(responseBody));
+            }
+
+            // When error occurred
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                } else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        client.post(PRODUCTION_SERVER_ADDRESS + "getfines.php", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                // Update SQLite DB with response sent by getfines.php
+                updateFinesSQLite(new String(responseBody));
             }
 
             // When error occurred
@@ -240,31 +281,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void updateSQLite(String response) {
+    public void updatePlayersSQLite(String response) {
         ArrayList<HashMap<String, String>> playersSyncList = new ArrayList<>();
-        // Create GSON object
         Gson gson = new GsonBuilder().create();
         try {
-            // Extract JSON array from the response
-            JSONArray arr = new JSONArray(response);
-            System.out.println(arr.length());
-            // If no of array elements is not zero
-            if (arr.length() != 0) {
-                // Loop through each array element, get JSON object which has userid and username
-                for (int i = 0; i < arr.length(); i++) {
+            JSONArray array = new JSONArray(response);
+
+            if (array.length() != 0) {
+                // Loop through each array element
+                for (int i = 0; i < array.length(); i++) {
                     // Get JSON object
-                    JSONObject obj = (JSONObject) arr.get(i);
-                    //System.out.println(obj.get("userId"));
-                    //System.out.println(obj.get("userName"));
-                    // DB QueryValues Object to insert into SQLite
-                    //queryValues = new HashMap<String, String>();
-                    // Add userID extracted from Object
-                    //queryValues.put("userId", obj.get("userId").toString());
-                    // Add userName extracted from Object
-                    //queryValues.put("userName", obj.get("userName").toString());
-                    // Insert User into SQLite DB
+                    JSONObject obj = (JSONObject) array.get(i);
+                    // Insert Player into local SQLite DB
+                    String playerId = obj.get("playerId").toString();
+                    String playerName = obj.get("playerName").toString();
+                    String playerFines = obj.get("playerFines").toString();
                     dataSource.open();
-                    dataSource.createPlayer(obj.get("playerName").toString());
+                    dataSource.createPlayer(playerName);
+                    if (playerFines != null) {
+                        Type type = new TypeToken<ArrayList<Fine>>() {
+                        }.getType();
+                        ArrayList<Fine> finesList = gson.fromJson(playerFines, type);
+                        dataSource.updatePlayer(Integer.parseInt(playerId), finesList);
+                    }
                     dataSource.close();
                     HashMap<String, String> map = new HashMap<>();
                     // Add status for each User in Hashmap
@@ -282,9 +321,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void updateFinesSQLite(String response) {
+        ArrayList<HashMap<String, String>> finesSyncList = new ArrayList<>();
+        Gson gson = new GsonBuilder().create();
+        try {
+            // Extract JSON array from the response
+            JSONArray arr = new JSONArray(response);
+            System.out.println(arr.length());
+            // If no of array elements is not zero
+            if (arr.length() != 0) {
+                // Loop through each array element, get JSON object which has userid and username
+                for (int i = 0; i < arr.length(); i++) {
+                    // Get JSON object
+                    JSONObject obj = (JSONObject) arr.get(i);
+                    // Insert User into SQLite DB
+                    dataSource.open();
+                    dataSource.createFine(obj.get("fineDescription").toString(), Integer.parseInt(obj.get("fineAmount").toString()));
+                    dataSource.close();
+                    HashMap<String, String> map = new HashMap<>();
+                    // Add status for each User in Hashmap
+                    map.put("Id", obj.get("fineId").toString());
+                    map.put("status", "1");
+                    finesSyncList.add(map);
+                }
+                // Inform Remote MySQL DB about the completion of Sync activity by passing Sync status of Users
+                updateMySQLSyncSts(gson.toJson(finesSyncList));
+                // Reload the Main Activity
+                this.recreate();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     // Method to inform remote MySQL DB about completion of Sync activity
     public void updateMySQLSyncSts(String json) {
-        System.out.println(json);
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("syncsts", json);
