@@ -25,7 +25,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
     private ArrayList<Fine> selectedItems;
     private Player selectedPlayer;
     private FinesAdapter finesAdapter;
-    private DataSource dataSource;
+    private DataSourcePlayer dataSourcePlayer;
+    private DataSourceFine dataSourceFine;
     private TextView totalSumOfFines;
 
     @Override
@@ -53,7 +54,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
 
         updateTotalSumOfFinesView();
 
-        dataSource = new DataSource(this);
+        dataSourcePlayer = new DataSourcePlayer(this);
+        dataSourceFine = new DataSourceFine(this);
 
         final ListView finesListView = (ListView) findViewById(R.id.finesListView);
         finesAdapter = new FinesAdapter(this, selectedPlayer.getFines());
@@ -92,13 +94,11 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                         }
                         String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
                         totalSumOfFines.setText(fineAmount);
-                        dataSource.open();
                         try {
-                            dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
+                            dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        dataSource.close();
                         actionMode.finish();
                         return true;
                     default:
@@ -116,14 +116,11 @@ public class PlayerDetailsActivity extends AppCompatActivity {
     private void showFineSelectionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         selectedItems = new ArrayList<>();
-        dataSource.open();
-        final List<Fine> allFines = dataSource.getAllFines();
-        dataSource.close();
+        final List<Fine> allFines = dataSourceFine.getAllFines();
         String[] namesStringArray = new String[allFines.size()];
         for (int i = 0; i < allFines.size(); i++) {
             namesStringArray[i] = allFines.get(i).getDescription();
         }
-        dataSource.open();
         builder.setTitle(R.string.add_fair)
 
                 .setMultiChoiceItems(namesStringArray, null,
@@ -148,7 +145,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                     finesAdapter.notifyDataSetChanged();
                 }
                 try {
-                    dataSource.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
+                    dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

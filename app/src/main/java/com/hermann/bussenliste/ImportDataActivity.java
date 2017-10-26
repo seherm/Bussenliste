@@ -38,7 +38,8 @@ import java.util.Locale;
 public class ImportDataActivity extends AppCompatActivity {
 
     private static final String TAG = "ImportDataActivity";
-    private DataSource dataSource;
+    private DataSourcePlayer dataSourcePlayer;
+    private DataSourceFine dataSourceFine;
     private File file;
     private ArrayList<String> pathHistory;
     private String lastDirectory;
@@ -53,15 +54,18 @@ public class ImportDataActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        dataSourcePlayer = new DataSourcePlayer(this);
+        dataSourceFine = new DataSourceFine(this);
+
         listViewInternalStorage = (ListView) findViewById(R.id.lvInternalStorage);
         Button buttonUpDirectory = (Button) findViewById(R.id.btnUpDirectory);
         Button buttonSDCard = (Button) findViewById(R.id.btnViewSDCard);
+
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.importing_files));
+        progressDialog.setCancelable(false);
 
         checkFilePermissions();
-
-        dataSource = new DataSource(this);
 
         listViewInternalStorage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -188,16 +192,16 @@ public class ImportDataActivity extends AppCompatActivity {
 
             //use try catch to make sure there are no "" that try to parse into doubles.
             try {
-                dataSource.open();
+
                 if (sheetIndex == 0) {
                     String name = columns[0];
-                    dataSource.createPlayer(name);
+                    dataSourcePlayer.createPlayer(name);
                 } else {
                     String description = columns[0];
                     int amount = (int) Double.parseDouble(columns[1].trim());
-                    dataSource.createFine(description, amount);
+                    dataSourceFine.createFine(description, amount);
                 }
-                dataSource.close();
+
 
             } catch (NumberFormatException e) {
                 Log.e(TAG, "parseStringBuilder: NumberFormatException: " + e.getMessage());

@@ -14,9 +14,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -25,9 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -36,9 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
     //private static final String TEST_SERVER_ADDRESS = "http://192.168.0.101:80/sqlitemysqlsync/";
-    private DataSource dataSource;
-    List<Player> players;
-    List<Fine> fines;
+    private DataSourcePlayer dataSourcePlayer;
+    private DataSourceFine dataSourceFine;
     ProgressDialog progressDialog;
 
     @Override
@@ -48,16 +41,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Transferring Data from Remote MySQL DB and Syncing SQLite. Please wait...");
-        progressDialog.setCancelable(false);
-
-
-        dataSource = new DataSource(this);
-        dataSource.open();
-        players = dataSource.getAllPlayers();
-        fines = dataSource.getAllFines();
-        dataSource.close();
+        dataSourcePlayer = new DataSourcePlayer(this);
+        dataSourceFine = new DataSourceFine(this);
 
         if (noPlayers() || noFines()) {
             showImportDataDialog();
@@ -65,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize players view
         GridView gridView = (GridView) findViewById(R.id.players);
-        final PlayersAdapter playersAdapter = new PlayersAdapter(this, players);
+        final PlayersAdapter playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
         gridView.setAdapter(playersAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -77,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean noPlayers() {
-        return players.isEmpty();
+        return dataSourcePlayer.getAllPlayers().isEmpty();
     }
 
     private boolean noFines() {
-        return fines.isEmpty();
+        return dataSourceFine.getAllFines().isEmpty();
     }
 
     private void showImportDataDialog() {
@@ -91,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                syncMySQLSQLiteDB();
+                //syncMySQLSQLiteDB();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -138,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 goToSettingsPage();
                 break;
             case R.id.action_sync:
-                syncSQLiteMySQLDB();
+                uploadDataToServer();
                 break;
             default:
                 return true;
@@ -147,20 +132,23 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void uploadDataToServer() {
+        uploadPlayersToServer();
+        uploadFinesToServer();
+    }
 
-    private void syncSQLiteMySQLDB() {
+    private void uploadPlayersToServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-
-        dataSource.open();
-        List<Player> playerList = dataSource.getAllPlayers();
-        progressDialog.setMessage("Synching SQLite Data with Remote MySQL DB. Please wait...");
+        List<Player> playerList = dataSourcePlayer.getAllPlayers();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Syncing SQLite Data with Remote MySQL DB. Please wait...");
         progressDialog.setCancelable(false);
 
         if (playerList.size() != 0) {
-            if (dataSource.dbSyncCount(DatabaseHelper.TABLE_PLAYERS) != 0) {
+            if (dataSourcePlayer.dbSyncCount() != 0) {
                 progressDialog.show();
-                params.put("playersJSON", dataSource.composeJSONfromSQLite(DatabaseHelper.TABLE_PLAYERS));
+                params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
                 client.post(PRODUCTION_SERVER_ADDRESS + "insertplayer.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -169,39 +157,7 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray arr = new JSONArray(new String(responseBody));
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
-                                dataSource.updateSyncStatus(DatabaseHelper.TABLE_PLAYERS, obj.get("id").toString(), obj.get("status").toString());
-                            }
-                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        if (statusCode == 404) {
-                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                        } else if (statusCode == 500) {
-                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-            } else if (dataSource.dbSyncCount(DatabaseHelper.TABLE_FINES) != 0) {
-                params.put("finesJSON", dataSource.composeJSONfromSQLite(DatabaseHelper.TABLE_FINES));
-                client.post(PRODUCTION_SERVER_ADDRESS + "insertfine.php", params, new AsyncHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        try {
-                            JSONArray arr = new JSONArray(new String(responseBody));
-                            System.out.println(arr.length());
-                            for (int i = 0; i < arr.length(); i++) {
-                                JSONObject obj = (JSONObject) arr.get(i);
-                                System.out.println(obj.get("id"));
-                                System.out.println(obj.get("status"));
-                                dataSource.updateSyncStatus(DatabaseHelper.TABLE_FINES, obj.get("id").toString(), obj.get("status").toString());
+                                dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -230,11 +186,65 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void uploadFinesToServer() {
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        List<Fine> finesList = dataSourceFine.getAllFines();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Syncing SQLite Data with Remote MySQL DB. Please wait...");
+        progressDialog.setCancelable(false);
+
+        if (finesList.size() != 0) {
+            if (dataSourceFine.dbSyncCount() != 0) {
+                params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
+                client.post(PRODUCTION_SERVER_ADDRESS + "insertfine.php", params, new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        try {
+                            JSONArray arr = new JSONArray(new String(responseBody));
+                            System.out.println(arr.length());
+                            for (int i = 0; i < arr.length(); i++) {
+                                JSONObject obj = (JSONObject) arr.get(i);
+                                System.out.println(obj.get("id"));
+                                System.out.println(obj.get("status"));
+                                dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                            }
+                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        if (statusCode == 404) {
+                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                        } else if (statusCode == 500) {
+                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
+            } else {
+                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     // Method to Sync online MySQL DB with local SQLite DB
+    /***
     public void syncMySQLSQLiteDB() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Transferring Data from Remote MySQL DB and Syncing SQLite. Please wait...");
+        progressDialog.setCancelable(false);
         progressDialog.show();
         // Make Http call to getplayers.php
         client.post(PRODUCTION_SERVER_ADDRESS + "getplayers.php", params, new AsyncHttpResponseHandler() {
@@ -373,4 +383,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+     **/
 }
