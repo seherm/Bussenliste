@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PlayersAdapter extends BaseAdapter {
 
-    private final List<Player> players;
+    private List<Player> players;
     private final Context context;
 
     public PlayersAdapter(Context context, List<Player> players) {
@@ -54,5 +54,10 @@ public class PlayersAdapter extends BaseAdapter {
 
         return convertView;
 
+    }
+
+    public void refresh(List<Player> players){
+        this.players = players;
+        notifyDataSetChanged();
     }
 }

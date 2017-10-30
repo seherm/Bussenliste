@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -38,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     //private static final String TEST_SERVER_ADDRESS = "http://192.168.0.101:80/sqlitemysqlsync/";
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
+    private PlayersAdapter playersAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize players view
         GridView gridView = (GridView) findViewById(R.id.players);
-        final PlayersAdapter playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
+        playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
         gridView.setAdapter(playersAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -128,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 goToSettingsPage();
                 break;
+            case R.id.action_addPlayer:
+                showAddPlayerDialog();
+                break;
             case R.id.action_sync:
                 uploadDataToServer();
                 break;
@@ -136,6 +141,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showAddPlayerDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Enter name");
+        builder.setTitle(R.string.action_add_player);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String playerName = String.valueOf(editText.getText());
+                dataSourcePlayer.createPlayer(playerName);
+                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        builder.show();
+
     }
 
     private void uploadDataToServer() {
