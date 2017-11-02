@@ -7,8 +7,8 @@
     <string name="ok">OK</string>
     <string name="delete_text">Löschen</string>
     <string name="fineAmount">%1$d CHF</string>
-    <string name="title_activity_import_data">Daten importieren</string>
-    <string name="action_sync">Daten synchronisieren</string>
+    <string name="title_activity_import_data">Datei auswählen</string>
+    <string name="action_sync">Daten mit Server synchronisieren</string>
     <string name="error_incorrect_excel_format">Error: Excel Dateiformat ist nicht korrekt!</string>
     <string name="importing_files">Daten werden importiert…</string>
     <string name="import_players_message">Es wurden noch keine Spieler oder Bussen hinzugefügt. Möchten Sie die Spieler und Bussen importieren?</string>
@@ -16,5 +16,11 @@
     <string name="title_activity_settings">Einstellungen</string>
     <string name="back">Zurück</string>
     <string name="memory">Speicher</string>
-    <string name="action_create_player">Spieler hinzufügen</string>
+    <string name="action_create_player">Neuen Spieler erstellen</string>
+    <string name="action_create_fine">Neue Busse erstellen</string>
+    <string name="action_import">Daten von Excel-Datei importieren</string>
+    <string name="add">Hinzufügen</string>
+    <string name="fineAmountText">Betrag</string>
+    <string name="fineDescription">Beschreibung</string>
+    <string name="name">Vorname / Name</string>
 </resources>
