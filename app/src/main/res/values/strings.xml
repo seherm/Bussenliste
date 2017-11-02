@@ -13,7 +13,7 @@
     <string name="back">Back</string>
     <string name="memory">Memory</string>
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
-    <string name="importing_files">Importing Data…</string>
+    <string name="importing_files">Importing Data. Please wait…</string>
     <string name="title_activity_settings">Settings</string>
     <string name="no_players_available">No Data</string>
     <string name="import_players_message">No players or fines have been added yet. Would you like to import the players and fines?</string>
@@ -23,4 +23,6 @@
     <string name="fineAmountText">Amount</string>
     <string name="name">First Name / Name</string>
     <string name="action_import">Import Data from Excel-File</string>
+    <string name="deleted_players">Selected players deleted</string>
+    <string name="added_player">Player added successfully</string>
 </resources>

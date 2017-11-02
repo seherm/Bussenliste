@@ -96,6 +96,19 @@ public class DataSourceFine {
     }
 
 
+    public boolean hasFine(Long id, String description) {
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
+        String Query = "SELECT * FROM fines WHERE _id =" + "'" + id + "'" + " AND description =" + "'" + description + "'";
+        Cursor cursor = database.rawQuery(Query, null);
+        if (cursor.getCount() <= 0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
+
     public String composeJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();

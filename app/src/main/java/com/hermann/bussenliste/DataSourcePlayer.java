@@ -160,4 +160,16 @@ public class DataSourcePlayer {
         String updateQuery = "Update fines SET updateStatus = '" + status + "' WHERE _id=" + "'" + id + "'";
         database.execSQL(updateQuery);
     }
+
+    public boolean hasPlayer(long id, String name) {
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
+        String Query = "SELECT * FROM players WHERE _id =" + "'" + id + "'" + " AND name =" + "'" + name + "'";
+        Cursor cursor = database.rawQuery(Query, null);
+        if (cursor.getCount() <= 0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
 }
