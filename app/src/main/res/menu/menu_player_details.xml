@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.hermann.bussenliste.MainActivity">
+
+    <item
+        android:id="@+id/action_create_fine"
+        android:orderInCategory="1"
+        android:title="@string/action_create_fine"
+        app:icon="@drawable/ic_add"
+        app:showAsAction="never" />
+</menu>

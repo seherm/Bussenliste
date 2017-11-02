@@ -7,7 +7,8 @@
     <string name="cancel">Cancel</string>
     <string name="add_fair">Adding a new Fair</string>
     <string name="delete_text">Delete</string>
-    <string name="action_add_player">Add Player</string>
+    <string name="action_create_player">Create new Player</string>
+    <string name="action_create_fine">Create new Fine</string>
     <string name="fineAmount">%1$d USD</string>
     <string name="back">Back</string>
     <string name="memory">Memory</string>
@@ -18,4 +19,6 @@
     <string name="import_players_message">No players or fines have been added yet. Would you like to import the players and fines?</string>
     <string name="action_sync">Sync Data</string>
     <string name="add">Add</string>
+    <string name="fineDescription">Description</string>
+    <string name="fineAmountText">Amount</string>
 </resources>

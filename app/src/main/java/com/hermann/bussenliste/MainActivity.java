@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -130,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 goToSettingsPage();
                 break;
-            case R.id.action_addPlayer:
-                showAddPlayerDialog();
+            case R.id.action_create_player:
+                showCreateNewPlayerDialog();
                 break;
             case R.id.action_sync:
                 uploadDataToServer();
@@ -143,10 +144,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showAddPlayerDialog() {
+    private void showCreateNewPlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Enter name");
-        builder.setTitle(R.string.action_add_player);
+        builder.setTitle(R.string.action_create_player);
         final EditText editText = new EditText(this);
         builder.setView(editText);
         builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
