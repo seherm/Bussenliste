@@ -34,7 +34,8 @@
         <activity
             android:name=".ImportDataActivity"
             android:label="@string/title_activity_import_data"
-            android:theme="@style/BussenlisteTheme.NoActionBar" />
+            android:theme="@style/BussenlisteTheme.NoActionBar"
+            android:parentActivityName="com.hermann.bussenliste.MainActivity"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
