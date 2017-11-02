@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Player selectedPlayer = (Player) playersAdapter.getItem(i);
+                Player selectedPlayer = playersAdapter.getItem(i);
                 goToPlayerDetailsPage(selectedPlayer);
             }
         });
@@ -158,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -182,6 +181,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_sync:
                 uploadDataToServer();
+                return true;
+            case R.id.action_import:
+                goToImportDataPage();
                 return true;
         }
 

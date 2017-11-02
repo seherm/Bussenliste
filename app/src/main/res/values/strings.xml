@@ -22,4 +22,5 @@
     <string name="fineDescription">Description</string>
     <string name="fineAmountText">Amount</string>
     <string name="name">Name</string>
+    <string name="action_import">Import Data from File</string>
 </resources>

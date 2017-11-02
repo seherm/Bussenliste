@@ -19,5 +19,11 @@
         android:title="@string/action_sync"
         app:showAsAction="never"
         app:icon="@drawable/ic_sync"/>
+    <item
+        android:id="@+id/action_import"
+        android:orderInCategory="2"
+        android:title="@string/action_import"
+        app:showAsAction="never"
+        app:icon="@drawable/ic_add"/>
 
 </menu>
