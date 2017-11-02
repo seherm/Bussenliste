@@ -130,14 +130,12 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.action_settings:
                 goToSettingsPage();
-                break;
+                return true;
             case R.id.action_create_player:
                 showCreateNewPlayerDialog();
-                break;
+                return true;
             case R.id.action_sync:
                 uploadDataToServer();
-                break;
-            default:
                 return true;
         }
 
@@ -146,9 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void showCreateNewPlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Enter name");
         builder.setTitle(R.string.action_create_player);
         final EditText editText = new EditText(this);
+        editText.setHint(R.string.name);
         builder.setView(editText);
         builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
             @Override
