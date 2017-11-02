@@ -1,6 +1,7 @@
 package com.hermann.bussenliste;
 
 import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,12 @@ public class PlayersAdapter extends BaseAdapter {
 
     private List<Player> players;
     private final Context context;
+    private final SparseBooleanArray mSelectedItemsIds;
 
     public PlayersAdapter(Context context, List<Player> players) {
         this.context = context;
         this.players = players;
+        mSelectedItemsIds = new SparseBooleanArray();
     }
 
     @Override
@@ -25,13 +28,13 @@ public class PlayersAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i) {
+    public Player getItem(int i) {
         return players.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return players.get(i).getId();
     }
 
     @Override
@@ -58,6 +61,22 @@ public class PlayersAdapter extends BaseAdapter {
 
     public void refresh(List<Player> players){
         this.players = players;
+        notifyDataSetChanged();
+    }
+
+    public SparseBooleanArray getSelectedIds() {
+        return mSelectedItemsIds;
+    }
+
+    public void toggleSelection(int i) {
+        selectView(i, !mSelectedItemsIds.get(i));
+    }
+
+    private void selectView(int position, boolean value) {
+        if (value)
+            mSelectedItemsIds.put(position, true);
+        else
+            mSelectedItemsIds.delete(position);
         notifyDataSetChanged();
     }
 }

@@ -121,6 +121,12 @@ public class DataSourcePlayer {
         return playersList;
     }
 
+    public long deletePlayer(long id) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        return db.delete(DatabaseHelper.TABLE_PLAYERS, DatabaseHelper.COLUMN_ID + " = ?",
+                new String[]{Long.toString(id)});
+    }
+
     public String composeJSONfromSQLite() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();

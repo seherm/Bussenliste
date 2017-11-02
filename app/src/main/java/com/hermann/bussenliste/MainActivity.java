@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //initialize players view
-        GridView gridView = (GridView) findViewById(R.id.players);
+        final GridView gridView = (GridView) findViewById(R.id.players);
         playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
         gridView.setAdapter(playersAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -65,6 +67,50 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Player selectedPlayer = (Player) playersAdapter.getItem(i);
                 goToPlayerDetailsPage(selectedPlayer);
+            }
+        });
+        gridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
+        gridView.setMultiChoiceModeListener(new GridView.MultiChoiceModeListener() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.delete_action_mode, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.delete_mode:
+                        SparseBooleanArray selected = playersAdapter.getSelectedIds();
+                        for (int i = (selected.size() - 1); i >= 0; i--) {
+                            if (selected.valueAt(i)) {
+                                Player selectedItem = playersAdapter.getItem(selected.keyAt(i));
+                                dataSourcePlayer.deletePlayer(selectedItem.getId());
+                                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+                            }
+                        }
+                        mode.finish();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                int checkedCount = gridView.getCheckedItemCount();
+                mode.setTitle(Integer.toString(checkedCount));
+                playersAdapter.toggleSelection(position);
             }
         });
     }

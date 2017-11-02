@@ -34,7 +34,7 @@ public class FinesAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return fines.get(i).getId();
     }
 
     @Override
@@ -61,20 +61,19 @@ public class FinesAdapter extends BaseAdapter {
         fines.remove(fine);
     }
 
-    private void selectView(int position, boolean value) {
-        if (value)
-            mSelectedItemsIds.put(position, true);
-        else
-            mSelectedItemsIds.delete(position);
-        notifyDataSetChanged();
-    }
-
-
     public SparseBooleanArray getSelectedIds() {
         return mSelectedItemsIds;
     }
 
     public void toggleSelection(int i) {
         selectView(i, !mSelectedItemsIds.get(i));
+    }
+
+    private void selectView(int position, boolean value) {
+        if (value)
+            mSelectedItemsIds.put(position, true);
+        else
+            mSelectedItemsIds.delete(position);
+        notifyDataSetChanged();
     }
 }
