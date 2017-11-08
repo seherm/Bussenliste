@@ -121,7 +121,7 @@ public class DataSourceFine {
                 map.put("fineId", cursor.getString(0));
                 map.put("fineDescription", cursor.getString(1));
                 map.put("fineAmount", cursor.getString(2));
-                map.put("fineDate", cursor.getString(2));
+                map.put("fineDate", cursor.getString(3));
                 wordList.add(map);
 
             } while (cursor.moveToNext());
