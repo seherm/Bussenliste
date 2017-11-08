@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject obj = (JSONObject) arr.get(i);
                                 dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
-                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Players uploaded!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                             e.printStackTrace();
@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "No new Players to upload", Toast.LENGTH_LONG).show();
             }
 
         } else {
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                                 System.out.println(obj.get("status"));
                                 dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
-                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Fines uploaded successfully!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             uploadingProgressDialog.hide();
                             Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
             } else {
-                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "No Fines to upload!", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
