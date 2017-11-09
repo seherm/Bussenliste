@@ -25,4 +25,6 @@
     <string name="action_import">Import Data from Excel-File</string>
     <string name="deleted_players">Selected players deleted</string>
     <string name="added_player">Player added successfully</string>
+    <string name="empty_player">Player name is empty. Please enter a name!</string>
+    <string name="already_added_player">This player already exists!</string>
 </resources>

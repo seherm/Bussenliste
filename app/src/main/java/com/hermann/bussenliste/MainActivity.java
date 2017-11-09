@@ -193,10 +193,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String playerName = String.valueOf(editText.getText());
-                dataSourcePlayer.createPlayer(playerName);
-                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
-                Toast.makeText(getApplicationContext(), R.string.added_player, Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -205,7 +201,27 @@ public class MainActivity extends AppCompatActivity {
                 dialogInterface.cancel();
             }
         });
-        builder.show();
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean isEmptyText = (editText.getText().toString().trim().isEmpty());
+                // if EditText is empty disable closing on positive button
+                String playerName = String.valueOf(editText.getText());
+
+                if (!dataSourcePlayer.hasPlayer(playerName) && !isEmptyText) {
+                    dataSourcePlayer.createPlayer(playerName);
+                    playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+                    Toast.makeText(getApplicationContext(), R.string.added_player, Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                } else if (isEmptyText) {
+                    Toast.makeText(getApplicationContext(), R.string.empty_player, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.already_added_player, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void uploadDataToServer() {
@@ -363,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
                     String playerFines = obj.get("playerFines").toString();
 
 
-                    if(!dataSourcePlayer.hasPlayer(Long.parseLong(playerId),playerName)){
+                    if (!dataSourcePlayer.hasPlayer(playerName)) {
                         dataSourcePlayer.createPlayer(playerName);
                         if (playerFines != null) {
                             Type type = new TypeToken<ArrayList<Fine>>() {
@@ -427,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
                     String fineDescription = obj.get("fineDescription").toString();
                     String fineAmount = obj.get("fineAmount").toString();
 
-                    if(!dataSourceFine.hasFine(Long.parseLong(fineId),fineDescription)){
+                    if (!dataSourceFine.hasFine(fineDescription)) {
                         dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
                     }
 

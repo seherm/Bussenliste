@@ -161,9 +161,9 @@ public class DataSourcePlayer {
         database.execSQL(updateQuery);
     }
 
-    public boolean hasPlayer(long id, String name) {
+    public boolean hasPlayer(String name) {
         SQLiteDatabase database = dbHelper.getReadableDatabase();
-        String Query = "SELECT * FROM players WHERE _id =" + "'" + id + "'" + " AND name =" + "'" + name + "'";
+        String Query = "SELECT * FROM players WHERE name =" + "'" + name + "'";
         Cursor cursor = database.rawQuery(Query, null);
         if (cursor.getCount() <= 0) {
             cursor.close();

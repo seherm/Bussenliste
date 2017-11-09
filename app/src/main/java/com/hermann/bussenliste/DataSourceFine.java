@@ -96,9 +96,9 @@ public class DataSourceFine {
     }
 
 
-    public boolean hasFine(Long id, String description) {
+    public boolean hasFine(String description) {
         SQLiteDatabase database = dbHelper.getReadableDatabase();
-        String Query = "SELECT * FROM fines WHERE _id =" + "'" + id + "'" + " AND description =" + "'" + description + "'";
+        String Query = "SELECT * FROM fines WHERE description =" + "'" + description + "'";
         Cursor cursor = database.rawQuery(Query, null);
         if (cursor.getCount() <= 0) {
             cursor.close();
