@@ -224,6 +224,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void deletePlayerOnServer(Player player){
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("PlayersJSON",player.getName());
+        client.post(PRODUCTION_SERVER_ADDRESS + "deleteplayer.php", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+
+            }
+        });
+    }
+
     private void uploadDataToServer() {
         uploadPlayersToServer();
         uploadFinesToServer();
