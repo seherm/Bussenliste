@@ -157,7 +157,7 @@ public class DataSourcePlayer {
 
     public void updateSyncStatus(String id, String status) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        String updateQuery = "Update fines SET updateStatus = '" + status + "' WHERE _id=" + "'" + id + "'";
+        String updateQuery = "Update players SET updateStatus = '" + status + "' WHERE _id=" + "'" + id + "'";
         database.execSQL(updateQuery);
     }
 

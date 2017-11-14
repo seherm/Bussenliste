@@ -57,11 +57,13 @@ public class MainActivity extends AppCompatActivity {
         dataSourceFine = new DataSourceFine(this);
 
         uploadingProgressDialog = new ProgressDialog(this);
-        uploadingProgressDialog.setMessage("Uploading Data to remote Server. Please wait...");
+        uploadingProgressDialog.setTitle("Uploading Data to remote Server");
+        uploadingProgressDialog.setMessage("Please wait...");
         uploadingProgressDialog.setCancelable(false);
 
         downloadingProgressDialog = new ProgressDialog(this);
-        downloadingProgressDialog.setMessage("Downloading Data from remote Server. Please wait...");
+        downloadingProgressDialog.setTitle("Downloading Data from remote Server");
+        downloadingProgressDialog.setMessage("Please wait...");
         downloadingProgressDialog.setCancelable(false);
 
         if (noPlayers() || noFines()) {
@@ -100,8 +102,10 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = (selected.size() - 1); i >= 0; i--) {
                             if (selected.valueAt(i)) {
                                 Player selectedItem = playersAdapter.getItem(selected.keyAt(i));
+                                //Delete player in SQLite DB
                                 dataSourcePlayer.deletePlayer(selectedItem.getId());
                                 playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+                                //Delete player in remote MySQL DB
                                 deletePlayerOnServer(selectedItem);
                                 Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_SHORT).show();
                             }
@@ -115,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-
             }
 
             @Override
@@ -208,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Boolean isEmptyText = (editText.getText().toString().trim().isEmpty());
-                // if EditText is empty disable closing on positive button
                 String playerName = String.valueOf(editText.getText());
 
                 if (!dataSourcePlayer.hasPlayer(playerName) && !isEmptyText) {
@@ -313,8 +315,6 @@ public class MainActivity extends AppCompatActivity {
                             System.out.println(arr.length());
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
-                                System.out.println(obj.get("id"));
-                                System.out.println(obj.get("status"));
                                 dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
                             Toast.makeText(getApplicationContext(), "Fines uploaded successfully!", Toast.LENGTH_LONG).show();
@@ -397,7 +397,6 @@ public class MainActivity extends AppCompatActivity {
                     String playerName = obj.get("playerName").toString();
                     String playerFines = obj.get("playerFines").toString();
 
-
                     if (!dataSourcePlayer.hasPlayer(playerName)) {
                         dataSourcePlayer.createPlayer(playerName);
                         if (playerFines != null) {
@@ -408,8 +407,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-                // Reload the Main Activity
-                this.recreate();
+                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -467,8 +465,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 }
-                // Reload the Main Activity
-                this.recreate();
             }
         } catch (JSONException e) {
             e.printStackTrace();
