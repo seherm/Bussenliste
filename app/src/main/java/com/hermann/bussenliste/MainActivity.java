@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                                 Player selectedItem = playersAdapter.getItem(selected.keyAt(i));
                                 dataSourcePlayer.deletePlayer(selectedItem.getId());
                                 playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+                                deletePlayerOnServer(selectedItem);
                                 Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -227,16 +228,17 @@ public class MainActivity extends AppCompatActivity {
     private void deletePlayerOnServer(Player player){
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        params.put("PlayersJSON",player.getName());
+        Gson gson = new GsonBuilder().create();
+        params.put("playersJSON",gson.toJson(player.getName()));
         client.post(PRODUCTION_SERVER_ADDRESS + "deleteplayer.php", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-
+                Toast.makeText(getApplicationContext(), "SUUCCESSS", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
+                Toast.makeText(getApplicationContext(), "FAAAILL", Toast.LENGTH_SHORT).show();
             }
         });
     }
