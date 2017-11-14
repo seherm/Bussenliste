@@ -40,6 +40,7 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
 
     private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
+
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
     private ProgressDialog uploadingProgressDialog;
@@ -245,22 +246,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void uploadDataToServer() {
-        uploadPlayersToServer();
-        uploadFinesToServer();
-
-    }
-
-    private void uploadPlayersToServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         List<Player> playerList = dataSourcePlayer.getAllPlayers();
+        List<Fine> finesList = dataSourceFine.getAllFines();
 
         if (playerList.size() != 0) {
             if (dataSourcePlayer.dbSyncCount() != 0) {
                 uploadingProgressDialog.show();
                 params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
-                client.post(PRODUCTION_SERVER_ADDRESS + "insertplayer.php", params, new AsyncHttpResponseHandler() {
+                params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
+                client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         uploadingProgressDialog.hide();
@@ -268,9 +266,13 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray arr = new JSONArray(new String(responseBody));
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
-                                dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                if(obj.get("table").toString().equals("players")) {
+                                    dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                }else if(obj.get("table").toString().equals("fines")){
+                                    dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                }
                             }
-                            Toast.makeText(getApplicationContext(), "Players uploaded!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Data successfully uploaded!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                             e.printStackTrace();
@@ -293,54 +295,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "No new Players to upload", Toast.LENGTH_LONG).show();
             }
 
-        } else {
-            Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void uploadFinesToServer() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        List<Fine> finesList = dataSourceFine.getAllFines();
-        if (finesList.size() != 0) {
-            if (dataSourceFine.dbSyncCount() != 0) {
-                uploadingProgressDialog.show();
-                params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
-                client.post(PRODUCTION_SERVER_ADDRESS + "insertfine.php", params, new AsyncHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        try {
-                            uploadingProgressDialog.hide();
-                            JSONArray arr = new JSONArray(new String(responseBody));
-                            System.out.println(arr.length());
-                            for (int i = 0; i < arr.length(); i++) {
-                                JSONObject obj = (JSONObject) arr.get(i);
-                                dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
-                            }
-                            Toast.makeText(getApplicationContext(), "Fines uploaded successfully!", Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            uploadingProgressDialog.hide();
-                            Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        uploadingProgressDialog.hide();
-                        if (statusCode == 404) {
-                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                        } else if (statusCode == 500) {
-                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-
-            } else {
-                Toast.makeText(getApplicationContext(), "No Fines to upload!", Toast.LENGTH_LONG).show();
-            }
         } else {
             Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
         }
