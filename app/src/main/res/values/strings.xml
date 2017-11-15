@@ -27,4 +27,12 @@
     <string name="added_player">Player added successfully</string>
     <string name="empty_player">Player name is empty. Please enter a name!</string>
     <string name="already_added_player">A player with this name already exists!</string>
+
+    <string name="requested_resource_not_found">Requested resource not found</string>
+    <string name="something_went_wrong_at_server_end">Something went wrong at server end</string>
+    <string name="unexpected_error">Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]</string>
+
+    <string name="data_successfully_uploaded">Data successfully uploaded!</string>
+    <string name="json_error">Error occurred [Server\'s JSON response might be invalid]!</string>
+
 </resources>

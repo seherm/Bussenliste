@@ -238,11 +238,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
                 } else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -275,9 +275,9 @@ public class MainActivity extends AppCompatActivity {
                                     dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                                 }
                             }
-                            Toast.makeText(getApplicationContext(), "Data successfully uploaded!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
-                            Toast.makeText(getApplicationContext(), "Error occurred [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
                             e.printStackTrace();
                         }
                     }
@@ -286,11 +286,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                         uploadingProgressDialog.hide();
                         if (statusCode == 404) {
-                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
                         } else if (statusCode == 500) {
-                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
