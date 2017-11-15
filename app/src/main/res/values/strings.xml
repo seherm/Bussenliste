@@ -23,8 +23,8 @@
     <string name="fineAmountText">Amount</string>
     <string name="name">First Name / Name</string>
     <string name="action_import">Import Data from Excel-File</string>
-    <string name="deleted_players">Selected players deleted</string>
+    <string name="deleted_players">Selected players deleted successfully</string>
     <string name="added_player">Player added successfully</string>
     <string name="empty_player">Player name is empty. Please enter a name!</string>
-    <string name="already_added_player">This player already exists!</string>
+    <string name="already_added_player">A player with this name already exists!</string>
 </resources>

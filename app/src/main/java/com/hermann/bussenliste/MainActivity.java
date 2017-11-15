@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,7 +30,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -108,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
                                 playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
                                 //Delete player in remote MySQL DB
                                 deletePlayerOnServer(selectedItem);
-                                Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_SHORT).show();
                             }
                         }
                         mode.finish();
@@ -217,36 +213,43 @@ public class MainActivity extends AppCompatActivity {
                 if (!dataSourcePlayer.hasPlayer(playerName) && !isEmptyText) {
                     dataSourcePlayer.createPlayer(playerName);
                     playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
-                    Toast.makeText(getApplicationContext(), R.string.added_player, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.added_player, Toast.LENGTH_LONG).show();
                     dialog.dismiss();
                 } else if (isEmptyText) {
-                    Toast.makeText(getApplicationContext(), R.string.empty_player, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.empty_player, Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), R.string.already_added_player, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.already_added_player, Toast.LENGTH_LONG).show();
                 }
             }
         });
     }
 
-    private void deletePlayerOnServer(Player player){
+    private void deletePlayerOnServer(Player player) {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         Gson gson = new GsonBuilder().create();
-        params.put("playersJSON",gson.toJson(player.getName()));
+        params.put("playersJSON", gson.toJson(player.getName()));
         client.post(PRODUCTION_SERVER_ADDRESS + "deleteplayer.php", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                Toast.makeText(getApplicationContext(), "SUUCCESSS", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Toast.makeText(getApplicationContext(), "FAAAILL", Toast.LENGTH_SHORT).show();
+                if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                } else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
 
 
+    //Method to upload entries from local SQLite DB to online MySQL DB
     private void uploadDataToServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -266,9 +269,9 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray arr = new JSONArray(new String(responseBody));
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = (JSONObject) arr.get(i);
-                                if(obj.get("table").toString().equals("players")) {
+                                if (obj.get("table").toString().equals("players")) {
                                     dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
-                                }else if(obj.get("table").toString().equals("fines")){
+                                } else if (obj.get("table").toString().equals("fines")) {
                                     dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                                 }
                             }
@@ -300,24 +303,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Method to Sync online MySQL DB with local SQLite DB
-    public void downloadDataFromServer() {
-        downloadPlayersFromServer();
-        downloadFinesFromServer();
-    }
-
-
-    private void downloadPlayersFromServer() {
+    //Method to download entries from online MySQL DB and load it into local SQLite DB
+    private void downloadDataFromServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         downloadingProgressDialog.show();
-        // Make Http call to getplayers.php
-        client.post(PRODUCTION_SERVER_ADDRESS + "getplayers.php", params, new AsyncHttpResponseHandler() {
+        // Make Http call to getdata.php
+        client.post(PRODUCTION_SERVER_ADDRESS + "getdata.php", params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Update SQLite DB with response sent by getplayers.php
                 downloadingProgressDialog.hide();
-                updatePlayersSQLite(new String(responseBody));
+                updateSQLiteData(new String(responseBody));
+                Toast.makeText(getApplicationContext(), "Data successfully downloaded!", Toast.LENGTH_LONG).show();
             }
 
             // When error occurred
@@ -336,89 +334,47 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void updatePlayersSQLite(String response) {
-        Gson gson = new GsonBuilder().create();
+    private void updateSQLiteData(String response) {
         try {
             JSONArray array = new JSONArray(response);
-
             if (array.length() != 0) {
                 // Loop through each array element
                 for (int i = 0; i < array.length(); i++) {
                     // Get JSON object
                     JSONObject obj = (JSONObject) array.get(i);
-                    // Insert Player into local SQLite DB
-                    String playerId = obj.get("playerId").toString();
-                    String playerName = obj.get("playerName").toString();
-                    String playerFines = obj.get("playerFines").toString();
+                    String tableName = obj.get("table").toString();
 
-                    if (!dataSourcePlayer.hasPlayer(playerName)) {
-                        dataSourcePlayer.createPlayer(playerName);
-                        if (playerFines != null) {
-                            Type type = new TypeToken<ArrayList<Fine>>() {
-                            }.getType();
-                            ArrayList<Fine> finesList = gson.fromJson(playerFines, type);
-                            dataSourcePlayer.updatePlayer(Integer.parseInt(playerId), finesList);
-                        }
+                    switch (tableName) {
+                        case "players":
+                            // Insert player into local SQLite DB
+                            String playerId = obj.get("playerId").toString();
+                            String playerName = obj.get("playerName").toString();
+                            String playerFines = obj.get("playerFines").toString();
+
+                            if (!dataSourcePlayer.hasPlayer(playerName)) {
+                                dataSourcePlayer.createPlayer(playerName);
+                                if (playerFines != null) {
+                                    Type type = new TypeToken<ArrayList<Fine>>() {
+                                    }.getType();
+                                    Gson gson = new GsonBuilder().create();
+                                    ArrayList<Fine> finesList = gson.fromJson(playerFines, type);
+                                    dataSourcePlayer.updatePlayer(Integer.parseInt(playerId), finesList);
+                                }
+                            }
+                            break;
+                        case "fines":
+                            // Insert fine into local SQLite DB
+                            String fineId = obj.get("fineId").toString();
+                            String fineDescription = obj.get("fineDescription").toString();
+                            String fineAmount = obj.get("fineAmount").toString();
+
+                            if (!dataSourceFine.hasFine(fineDescription)) {
+                                dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
+                            }
+                            break;
                     }
                 }
                 playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void downloadFinesFromServer() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        downloadingProgressDialog.show();
-        // Make Http call to getfines.php
-        client.post(PRODUCTION_SERVER_ADDRESS + "getfines.php", params, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                // Update SQLite DB with response sent by getfines.php
-                downloadingProgressDialog.hide();
-                updateFinesSQLite(new String(responseBody));
-            }
-
-            // When error occurred
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                downloadingProgressDialog.hide();
-                if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                } else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
-    private void updateFinesSQLite(String response) {
-        Gson gson = new GsonBuilder().create();
-        try {
-            // Extract JSON array from the response
-            JSONArray arr = new JSONArray(response);
-            System.out.println(arr.length());
-            // If no of array elements is not zero
-            if (arr.length() != 0) {
-                // Loop through each array element, get JSON object which has userid and username
-                for (int i = 0; i < arr.length(); i++) {
-                    // Get JSON object
-                    JSONObject obj = (JSONObject) arr.get(i);
-                    // Insert Fine into SQLite DB
-                    String fineId = obj.get("fineId").toString();
-                    String fineDescription = obj.get("fineDescription").toString();
-                    String fineAmount = obj.get("fineAmount").toString();
-
-                    if (!dataSourceFine.hasFine(fineDescription)) {
-                        dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
-                    }
-
-                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
