@@ -34,5 +34,12 @@
 
     <string name="data_successfully_uploaded">Data successfully uploaded!</string>
     <string name="json_error">Error occurred [Server\'s JSON response might be invalid]!</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="uploading_data_to_remote_server">Uploading Data to remote Server</string>
+    <string name="downloading_data_from_remote_server">Downloading Data from remote Server</string>
+    <string name="no_data_in_sqlite_db">No data in SQLite DB</string>
+    <string name="no_data_to_upload">No data to upload</string>
+    <string name="data_downloaded">Data successfully downloaded!</string>
+
 
 </resources>

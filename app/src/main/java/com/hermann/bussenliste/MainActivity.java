@@ -55,13 +55,13 @@ public class MainActivity extends AppCompatActivity {
         dataSourceFine = new DataSourceFine(this);
 
         uploadingProgressDialog = new ProgressDialog(this);
-        uploadingProgressDialog.setTitle("Uploading Data to remote Server");
-        uploadingProgressDialog.setMessage("Please wait...");
+        uploadingProgressDialog.setTitle(getString(R.string.uploading_data_to_remote_server));
+        uploadingProgressDialog.setMessage(getString(R.string.please_wait));
         uploadingProgressDialog.setCancelable(false);
 
         downloadingProgressDialog = new ProgressDialog(this);
-        downloadingProgressDialog.setTitle("Downloading Data from remote Server");
-        downloadingProgressDialog.setMessage("Please wait...");
+        downloadingProgressDialog.setTitle(getString(R.string.downloading_data_from_remote_server));
+        downloadingProgressDialog.setMessage(getString(R.string.please_wait));
         downloadingProgressDialog.setCancelable(false);
 
         if (noPlayers() || noFines()) {
@@ -257,10 +257,10 @@ public class MainActivity extends AppCompatActivity {
         List<Fine> finesList = dataSourceFine.getAllFines();
 
         if (playerList.isEmpty() && finesList.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.no_data_in_sqlite_db, Toast.LENGTH_LONG).show();
         }
         if (dataSourcePlayer.dbSyncCount() == 0 && dataSourceFine.dbSyncCount() == 0) {
-            Toast.makeText(getApplicationContext(), "No data to upload", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.no_data_to_upload, Toast.LENGTH_LONG).show();
         }
         if (dataSourcePlayer.dbSyncCount() != 0) {
             params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
@@ -319,20 +319,19 @@ public class MainActivity extends AppCompatActivity {
                 // Update SQLite DB with response sent by getplayers.php
                 downloadingProgressDialog.hide();
                 updateSQLiteData(new String(responseBody));
-                Toast.makeText(getApplicationContext(), "Data successfully downloaded!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.data_downloaded, Toast.LENGTH_LONG).show();
             }
 
-            // When error occurred
+            //When error occurred
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 downloadingProgressDialog.hide();
                 if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
                 } else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
                 }
             }
         });
