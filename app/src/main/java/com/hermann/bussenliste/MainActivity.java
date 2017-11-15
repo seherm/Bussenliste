@@ -249,61 +249,65 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //Method to upload entries from local SQLite DB to online MySQL DB
+    //Method to upload table entries from local SQLite DB to online MySQL DB
     private void uploadDataToServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         List<Player> playerList = dataSourcePlayer.getAllPlayers();
         List<Fine> finesList = dataSourceFine.getAllFines();
 
-        if (playerList.size() != 0) {
-            if (dataSourcePlayer.dbSyncCount() != 0) {
-                uploadingProgressDialog.show();
-                params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
-                params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
-                client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new AsyncHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        uploadingProgressDialog.hide();
-                        try {
-                            JSONArray arr = new JSONArray(new String(responseBody));
-                            for (int i = 0; i < arr.length(); i++) {
-                                JSONObject obj = (JSONObject) arr.get(i);
-                                if (obj.get("table").toString().equals("players")) {
-                                    dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
-                                } else if (obj.get("table").toString().equals("fines")) {
-                                    dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
-                                }
-                            }
-                            Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        uploadingProgressDialog.hide();
-                        if (statusCode == 404) {
-                            Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
-                        } else if (statusCode == 500) {
-                            Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-            } else {
-                Toast.makeText(getApplicationContext(), "No new Players to upload", Toast.LENGTH_LONG).show();
-            }
-
-        } else {
+        if (playerList.isEmpty() && finesList.isEmpty()) {
             Toast.makeText(getApplicationContext(), "No data in SQLite DB", Toast.LENGTH_LONG).show();
+        }
+        if (dataSourcePlayer.dbSyncCount() == 0 && dataSourceFine.dbSyncCount() == 0) {
+            Toast.makeText(getApplicationContext(), "No data to upload", Toast.LENGTH_LONG).show();
+        }
+        if (dataSourcePlayer.dbSyncCount() != 0) {
+            params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
+        }
+        if (dataSourceFine.dbSyncCount() != 0) {
+            params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
+        }
+
+        if (params.has("playersJSON") || params.has("finesJSON")) {
+            uploadingProgressDialog.show();
+            client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new AsyncHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                    uploadingProgressDialog.hide();
+                    try {
+                        JSONArray arr = new JSONArray(new String(responseBody));
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = (JSONObject) arr.get(i);
+                            if (obj.get("table").toString().equals("players")) {
+                                dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                            } else if (obj.get("table").toString().equals("fines")) {
+                                dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                            }
+                        }
+                        Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    uploadingProgressDialog.hide();
+                    if (statusCode == 404) {
+                        Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
+                    } else if (statusCode == 500) {
+                        Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
     }
 
-    //Method to download entries from online MySQL DB and load it into local SQLite DB
+    //Method to download table entries from online MySQL DB and load it into local SQLite DB
     private void downloadDataFromServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -374,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                 }
+                //Refresh UI
                 playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
             }
         } catch (JSONException e) {
