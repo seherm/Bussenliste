@@ -53,7 +53,9 @@ public class ImportDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_import_data);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         dataSourcePlayer = new DataSourcePlayer(this);
         dataSourceFine = new DataSourceFine(this);

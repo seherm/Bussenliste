@@ -14,11 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by sebas on 26.10.2017.
- */
-
-
 public class DataSourceFine {
 
     private final DatabaseHelper dbHelper;
