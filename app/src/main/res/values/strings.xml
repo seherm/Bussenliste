@@ -9,11 +9,11 @@
     <string name="delete_text">Delete</string>
     <string name="action_create_player">Create new Player</string>
     <string name="action_create_fine">Create new Fine</string>
-    <string name="fineAmount">%1$d USD</string>
+    <string name="fineAmount">%1$d CHF</string>
     <string name="back">Back</string>
     <string name="memory">Memory</string>
     <string name="error_incorrect_excel_format">Error: Excel File Format is incorrect!</string>
-    <string name="importing_files">Importing Data. Please wait…</string>
+    <string name="importing_files">Importing Data</string>
     <string name="title_activity_settings">Settings</string>
     <string name="no_players_available">No Data</string>
     <string name="import_players_message">No players or fines have been added yet. Would you like to import the players and fines?</string>
@@ -21,16 +21,16 @@
     <string name="add">Add</string>
     <string name="fineDescription">Description</string>
     <string name="fineAmountText">Amount</string>
-    <string name="name">First Name / Name</string>
+    <string name="name">First Name / Last Name</string>
     <string name="action_import">Import Data from Excel-File</string>
     <string name="deleted_players">Selected players deleted successfully</string>
     <string name="added_player">Player added successfully</string>
-    <string name="empty_player">Player name is empty. Please enter a name!</string>
+    <string name="empty_player">Field is empty. Please enter a name!</string>
     <string name="already_added_player">A player with this name already exists!</string>
 
     <string name="requested_resource_not_found">Requested resource not found</string>
     <string name="something_went_wrong_at_server_end">Something went wrong at server end</string>
-    <string name="unexpected_error">Unexpected Error occurred! [Most common Error: Device might not be connected to Internet]</string>
+    <string name="unexpected_error">Unexpected Error occurred! Most common Error: Device might not be connected to Internet.</string>
 
     <string name="data_successfully_uploaded">Data successfully uploaded!</string>
     <string name="json_error">Error occurred [Server\'s JSON response might be invalid]!</string>
@@ -40,6 +40,7 @@
     <string name="no_data_in_sqlite_db">No data in SQLite DB</string>
     <string name="no_data_to_upload">No data to upload</string>
     <string name="data_downloaded">Data successfully downloaded!</string>
+    <string name="deleted_fines">Selected fines deleted successfully</string>
 
 
 </resources>

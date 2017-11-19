@@ -63,7 +63,8 @@ public class ImportDataActivity extends AppCompatActivity {
         Button buttonSDCard = (Button) findViewById(R.id.btnViewSDCard);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.importing_files));
+        progressDialog.setTitle(getString(R.string.importing_files));
+        progressDialog.setMessage(getString(R.string.please_wait));
         progressDialog.setCancelable(false);
 
         checkFilePermissions();

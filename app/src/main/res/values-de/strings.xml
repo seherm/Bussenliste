@@ -10,7 +10,7 @@
     <string name="title_activity_import_data">Datei auswählen</string>
     <string name="action_sync">Daten mit Server synchronisieren</string>
     <string name="error_incorrect_excel_format">Error: Excel Dateiformat ist nicht korrekt!</string>
-    <string name="importing_files">Daten werden importiert…</string>
+    <string name="importing_files">Daten werden importiert</string>
     <string name="import_players_message">Es wurden noch keine Spieler oder Bussen hinzugefügt. Möchten Sie die Spieler und Bussen importieren?</string>
     <string name="no_players_available">Keine Daten</string>
     <string name="title_activity_settings">Einstellungen</string>
@@ -22,5 +22,21 @@
     <string name="add">Hinzufügen</string>
     <string name="fineAmountText">Betrag</string>
     <string name="fineDescription">Beschreibung</string>
-    <string name="name">Vorname / Name</string>
+    <string name="name">Vorname Nachname</string>
+    <string name="deleted_players">Ausgewählte Spieler wurden erfolgreich gelöscht</string>
+    <string name="added_player">Spieler wurde erfolgreich hinzugefügt</string>
+    <string name="empty_player">Feld ist leer. Bitte geben sie einen Namen ein!</string>
+    <string name="already_added_player">Es existiert bereits ein Spieler mit diesem Namen</string>
+    <string name="requested_resource_not_found">Angeforderte Resource wurde nicht gefunden</string>
+    <string name="something_went_wrong_at_server_end">Es ging etwas schief auf der Server Seite</string>
+    <string name="unexpected_error">Unerwarteter Fehler vorgefallen! Typischer Fehler: Gerät ist nicht mit dem Internet verbunden.</string>
+    <string name="data_successfully_uploaded">Daten wurden erfolgreich hochgeladen!</string>
+    <string name="json_error">Fehler vorgefallen. Die JSON Antwort vom Server war invalid!</string>
+    <string name="please_wait">Bitte warten.…</string>
+    <string name="uploading_data_to_remote_server">Daten werden zum Server hochgeladen</string>
+    <string name="downloading_data_from_remote_server">Daten werden vom Server heruntergeladen</string>
+    <string name="no_data_in_sqlite_db">Keine Daten in der SQLite Datenbank</string>
+    <string name="no_data_to_upload">Keine Daten hochzuladen</string>
+    <string name="data_downloaded">Daten wurden erfolgreich heruntergeladen!</string>
+    <string name="deleted_fines">Ausgewählte Bussen wurden erfolgreich gelöscht</string>
 </resources>

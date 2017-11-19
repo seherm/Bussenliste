@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -103,6 +104,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        Toast.makeText(getApplicationContext(),R.string.deleted_fines,Toast.LENGTH_LONG).show();
                         actionMode.finish();
                         return true;
                     default:
@@ -182,7 +184,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         final List<Fine> allFines = dataSourceFine.getAllFines();
         String[] namesStringArray = new String[allFines.size()];
         for (int i = 0; i < allFines.size(); i++) {
-            namesStringArray[i] = allFines.get(i).getDescription();
+            namesStringArray[i] = allFines.get(i).getDescription() + " (" + allFines.get(i).getAmount() + ".-)";
         }
         builder.setTitle(R.string.add_fair)
 
