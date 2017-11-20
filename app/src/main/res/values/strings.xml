@@ -27,11 +27,9 @@
     <string name="added_player">Player added successfully</string>
     <string name="empty_player">Field is empty. Please enter a name!</string>
     <string name="already_added_player">A player with this name already exists!</string>
-
     <string name="requested_resource_not_found">Requested resource not found</string>
     <string name="something_went_wrong_at_server_end">Something went wrong at server end</string>
     <string name="unexpected_error">Unexpected Error occurred! Most common Error: Device might not be connected to Internet.</string>
-
     <string name="data_successfully_uploaded">Data successfully uploaded!</string>
     <string name="json_error">Error occurred [Server\'s JSON response might be invalid]!</string>
     <string name="please_wait">Please wait…</string>
@@ -41,6 +39,21 @@
     <string name="no_data_to_upload">No data to upload</string>
     <string name="data_downloaded">Data successfully downloaded!</string>
     <string name="deleted_fines">Selected fines deleted successfully</string>
+    <string name="action_add_photo">Add a player photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="select_new_photo">Select new photo</string>
+    <string name="delete_photo">Delete photo</string>
+    <string name="take_new_photo">Take new photo</string>
+    <string name="error_camera_permission">Camera Permission Error</string>
 
+    <string-array name="select_photo_items_array">
+        <item>@string/take_new_photo</item>
+        <item>@string/select_new_photo</item>
+    </string-array>
+    <string-array name="select_photo_items_array_with_delete">
+        <item>@string/take_new_photo</item>
+        <item>@string/select_new_photo</item>
+        <item>@string/delete_photo</item>
+    </string-array>
 
 </resources>

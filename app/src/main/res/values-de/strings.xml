@@ -39,4 +39,5 @@
     <string name="no_data_to_upload">Keine Daten hochzuladen</string>
     <string name="data_downloaded">Daten wurden erfolgreich heruntergeladen!</string>
     <string name="deleted_fines">Ausgewählte Bussen wurden erfolgreich gelöscht</string>
+    <string name="action_add_photo">Spieler Foto hinzufügen</string>
 </resources>
