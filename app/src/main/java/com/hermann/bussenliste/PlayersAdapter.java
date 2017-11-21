@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -47,16 +48,17 @@ public class PlayersAdapter extends BaseAdapter {
             convertView = layoutInflater.inflate(R.layout.player_item_layout, parent, false);
         }
 
-        //final ImageView imageView = (ImageView) convertView.findViewById(R.id.player_image);
-        final TextView nameTextView = (TextView) convertView.findViewById(R.id.player_name);
-        final TextView fineTextView = (TextView) convertView.findViewById(R.id.fine_sum);
+        final ImageView imageView = convertView.findViewById(R.id.player_image);
+        final TextView nameTextView = convertView.findViewById(R.id.player_name);
+        final TextView fineTextView = convertView.findViewById(R.id.fine_sum);
 
-        //imageView.setImageResource(player.getImageResource());
+        if(player.getPhoto() != null){
+            imageView.setImageBitmap(player.getPhoto());
+        }
         nameTextView.setText(player.getName());
         fineTextView.setText(context.getString(R.string.fineAmount, player.getTotalSumOfFines()));
 
         return convertView;
-
     }
 
     public void refresh(List<Player> players){
