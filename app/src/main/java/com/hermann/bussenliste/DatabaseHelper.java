@@ -22,6 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //PLAYERS Table - column names
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_FINES = "fines";
+    public static final String COLUMN_PHOTO = "photo";
     public static final String COLUMN_UPDATE_STATUS = "updateStatus";
 
     //FINES Table - column names
@@ -34,7 +35,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_TABLE_PLAYERS =
             "CREATE TABLE " + TABLE_PLAYERS +
                     "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NAME + " TEXT NOT NULL, " + COLUMN_FINES + " TEXT, " + COLUMN_UPDATE_STATUS + " TEXT);";
+                    COLUMN_NAME + " TEXT NOT NULL, " + COLUMN_FINES + " TEXT, " + COLUMN_PHOTO + " BLOB, " + COLUMN_UPDATE_STATUS + " TEXT);";
 
     //FINES table creation statement
     private static final String SQL_CREATE_TABLE_FINES =

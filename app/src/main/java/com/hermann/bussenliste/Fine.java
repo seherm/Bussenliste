@@ -2,7 +2,7 @@ package com.hermann.bussenliste;
 
 import java.io.Serializable;
 
-public class Fine implements Serializable {
+public class Fine {
 
     private final long id;
     private final String description;

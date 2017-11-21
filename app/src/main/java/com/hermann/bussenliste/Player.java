@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Player implements Serializable {
+public class Player {
 
     private final long id;
     private final String name;

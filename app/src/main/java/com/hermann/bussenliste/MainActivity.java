@@ -355,13 +355,15 @@ public class MainActivity extends AppCompatActivity {
                             String playerFines = obj.get("playerFines").toString();
 
                             if (!dataSourcePlayer.hasPlayer(playerName)) {
-                                dataSourcePlayer.createPlayer(playerName);
+                                long id = dataSourcePlayer.createPlayer(playerName);
+                                Player currentPlayer = dataSourcePlayer.getPlayer(id);
                                 if (playerFines != null) {
                                     Type type = new TypeToken<ArrayList<Fine>>() {
                                     }.getType();
                                     Gson gson = new GsonBuilder().create();
                                     ArrayList<Fine> finesList = gson.fromJson(playerFines, type);
-                                    dataSourcePlayer.updatePlayer(Integer.parseInt(playerId), finesList);
+                                    currentPlayer.setFines(finesList);
+                                    dataSourcePlayer.updatePlayer(currentPlayer);
                                 }
                             }
                             break;
@@ -388,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
     //Navigation
     private void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
-        intent.putExtra("SelectedPlayer", selectedPlayer);
+        intent.putExtra("SelectedPlayerId", selectedPlayer.getId());
         startActivity(intent);
     }
 

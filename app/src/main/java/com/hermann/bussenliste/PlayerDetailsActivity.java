@@ -88,13 +88,14 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         playerNameTextView = findViewById(R.id.player_name);
         finesListView = findViewById(R.id.finesListView);
 
-        selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
+        dataSourcePlayer = new DataSourcePlayer(this);
+        dataSourceFine = new DataSourceFine(this);
+
+        long selectedPlayerId = getIntent().getLongExtra("SelectedPlayerId",0);
+        selectedPlayer = dataSourcePlayer.getPlayer(selectedPlayerId);
         playerNameTextView.setText(selectedPlayer.getName());
 
         updateUI();
-
-        dataSourcePlayer = new DataSourcePlayer(this);
-        dataSourceFine = new DataSourceFine(this);
 
         finesAdapter = new FinesAdapter(this, selectedPlayer.getFines());
         finesListView.setAdapter(finesAdapter);
@@ -133,7 +134,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                         String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
                         finesSumTextView.setText(fineAmount);
                         try {
-                            dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
+                            dataSourcePlayer.updatePlayer(selectedPlayer);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -349,7 +350,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                     finesAdapter.notifyDataSetChanged();
                 }
                 try {
-                    dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
+                    dataSourcePlayer.updatePlayer(selectedPlayer);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -374,6 +375,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         Bitmap playerPhoto = selectedPlayer.getPhoto();
         if (playerPhoto != null) {
             playerPhotoImageView.setImageBitmap(playerPhoto);
+        }else{
+            playerPhotoImageView.setImageResource(R.drawable.player);
         }
     }
 
@@ -478,13 +481,22 @@ public class PlayerDetailsActivity extends AppCompatActivity {
     private void deletePicture() {
         selectedPlayer.setPhoto(null);
         updateUI();
-        //TODO:Save in DB
+        try {
+            dataSourcePlayer.updatePlayer(selectedPlayer);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void setPlayerPhoto(Bitmap bitmap){
+    private void setPlayerPhoto(Bitmap bitmap) {
         selectedPlayer.setPhoto(bitmap);
         updateUI();
-        //TODO: Save in DB
+        try {
+            dataSourcePlayer.updatePlayer(selectedPlayer);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -497,7 +509,6 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         }
 
     }
-
 
 
 }
