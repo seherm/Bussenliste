@@ -43,33 +43,39 @@ import java.util.List;
 
 public class PlayerDetailsActivity extends AppCompatActivity {
 
+    private static final int TAKE_IMAGE_REQUEST = 1;
+    private static final int PICK_IMAGE_REQUEST = 2;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+
     private ArrayList<Fine> selectedItems;
     private Player selectedPlayer;
     private FinesAdapter finesAdapter;
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
-    private TextView totalSumOfFines;
-    private ImageView mImageView;
 
-    private static final int TAKE_IMAGE_REQUEST = 1;
-    private static final int PICK_IMAGE_REQUEST = 2;
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+    private TextView finesSumTextView;
+    private TextView playerNameTextView;
+    private ImageView playerPhotoImageView;
+    private ListView finesListView;
 
-    String mCurrentPhotoPath;
+    private String mCurrentPhotoPath;
 
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_details);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("");
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,18 +83,19 @@ public class PlayerDetailsActivity extends AppCompatActivity {
             }
         });
 
-        selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
-        TextView playerName = (TextView) findViewById(R.id.player_name);
-        playerName.setText(selectedPlayer.getName());
+        playerPhotoImageView = findViewById(R.id.player_image);
+        finesSumTextView = findViewById(R.id.fines_sum);
+        playerNameTextView = findViewById(R.id.player_name);
+        finesListView = findViewById(R.id.finesListView);
 
-        updateTotalSumOfFinesView();
+        selectedPlayer = (Player) getIntent().getSerializableExtra("SelectedPlayer");
+        playerNameTextView.setText(selectedPlayer.getName());
+
+        updateUI();
 
         dataSourcePlayer = new DataSourcePlayer(this);
         dataSourceFine = new DataSourceFine(this);
 
-        mImageView = findViewById(R.id.player_image);
-
-        final ListView finesListView = (ListView) findViewById(R.id.finesListView);
         finesAdapter = new FinesAdapter(this, selectedPlayer.getFines());
         finesListView.setAdapter(finesAdapter);
         finesListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -124,7 +131,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                             }
                         }
                         String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
-                        totalSumOfFines.setText(fineAmount);
+                        finesSumTextView.setText(fineAmount);
                         try {
                             dataSourcePlayer.updatePlayer(selectedPlayer.getId(), selectedPlayer.getFines());
                         } catch (JSONException e) {
@@ -174,6 +181,47 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case TAKE_IMAGE_REQUEST: {
+                if (resultCode == RESULT_OK) {
+                    handleCameraPhoto();
+                }
+                break;
+            } // ACTION_TAKE_PHOTO
+
+            case PICK_IMAGE_REQUEST: {
+                if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                    Uri uri = data.getData();
+
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        setPlayerPhoto(bitmap);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                } // ACTION_TAKE_PHOTO
+            } // switch
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    showAddPhotoDialog();
+                } else {
+                    Toast.makeText(this, R.string.error_camera_permission, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
     private void showCreateNewFineDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -208,8 +256,6 @@ public class PlayerDetailsActivity extends AppCompatActivity {
 
     private void showAddPhotoDialog() {
 
-        checkPermissions();
-
         try {
             PackageManager packageManager = getPackageManager();
             int hasPerm = packageManager.checkPermission(Manifest.permission.CAMERA, getPackageName());
@@ -230,11 +276,11 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                             switch (item) {
                                 case 0:
                                     dialog.dismiss();
-                                    takePhoto();
+                                    dispatchTakePictureIntent();
                                     break;
                                 case 1:
-                                    pickPhoto();
                                     dialog.dismiss();
+                                    dispatchPickPictureIntent();
                             }
                         }
                     });
@@ -247,22 +293,22 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                             switch (item) {
                                 case 0:
                                     dialog.dismiss();
-                                    takePhoto();
+                                    dispatchTakePictureIntent();
                                     break;
                                 case 1:
                                     dialog.dismiss();
-                                    pickPhoto();
+                                    dispatchPickPictureIntent();
                                     break;
                                 case 2:
                                     dialog.dismiss();
-                                    deletePhoto();
+                                    deletePicture();
                             }
                         }
                     });
                     builder.show();
                 }
             } else {
-                Toast.makeText(this, R.string.error_camera_permission, Toast.LENGTH_SHORT).show();
+                requestPermissions();
             }
         } catch (Exception e) {
             Toast.makeText(this, R.string.error_camera_permission, Toast.LENGTH_SHORT).show();
@@ -307,7 +353,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                updateTotalSumOfFinesView();
+                updateUI();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
@@ -322,15 +368,16 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void updateTotalSumOfFinesView() {
-        if (totalSumOfFines == null) {
-            totalSumOfFines = (TextView) findViewById(R.id.total_sum_of_fines);
-        }
+    private void updateUI() {
         String fineAmount = getString(R.string.fineAmount, selectedPlayer.getTotalSumOfFines());
-        totalSumOfFines.setText(fineAmount);
+        finesSumTextView.setText(fineAmount);
+        Bitmap playerPhoto = selectedPlayer.getPhoto();
+        if (playerPhoto != null) {
+            playerPhotoImageView.setImageBitmap(playerPhoto);
+        }
     }
 
-    private void checkPermissions() {
+    private void requestPermissions() {
         if (ContextCompat.checkSelfPermission(PlayerDetailsActivity.this,
                 Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -344,55 +391,31 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void pickPhoto() {
-        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(pickPhotoIntent, PICK_IMAGE_REQUEST);
-    }
-
-    private void deletePhoto() {
-        selectedPlayer.setPhoto(null);
-    }
-
-    private void takePhoto() {
-        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.hermann.bussenliste.fileprovider",
-                        photoFile);
-                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePhotoIntent, TAKE_IMAGE_REQUEST);
-            }
-        }
-    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
+        File image = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, storageDir);
         return image;
     }
 
+    private File setUpPhotoFile() throws IOException {
+
+        File f = createImageFile();
+        mCurrentPhotoPath = f.getAbsolutePath();
+
+        return f;
+    }
+
     private void setPic() {
+        /* There isn't enough memory to open up more than a couple camera photos */
+        /* So pre-scale the target bitmap into which the file is decoded */
+
         // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
+        int targetW = playerPhotoImageView.getWidth();
+        int targetH = playerPhotoImageView.getHeight();
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -409,31 +432,13 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
+        /* Decode the JPEG file into a Bitmap */
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        selectedPlayer.setPhoto(bitmap);
-        mImageView.setImageBitmap(bitmap);
+
+        /* Associate the Bitmap to the Selected Player */
+        setPlayerPhoto(bitmap);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
-            Uri uri = data.getData();
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
-                mImageView.setImageBitmap(bitmap);
-                selectedPlayer.setPhoto(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else if(requestCode == TAKE_IMAGE_REQUEST && resultCode == RESULT_OK){
-            handleCameraPhoto();
-        }
-    }
 
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
@@ -442,6 +447,46 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
     }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = setUpPhotoFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                photoFile = null;
+                mCurrentPhotoPath = null;
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.hermann.bussenliste.fileprovider",
+                        photoFile);
+                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePhotoIntent, TAKE_IMAGE_REQUEST);
+            }
+        }
+    }
+
+    private void dispatchPickPictureIntent() {
+        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(pickPhotoIntent, PICK_IMAGE_REQUEST);
+    }
+
+    private void deletePicture() {
+        selectedPlayer.setPhoto(null);
+        updateUI();
+        //TODO:Save in DB
+    }
+
+    private void setPlayerPhoto(Bitmap bitmap){
+        selectedPlayer.setPhoto(bitmap);
+        updateUI();
+        //TODO: Save in DB
+    }
+
 
     private void handleCameraPhoto() {
 
@@ -452,4 +497,7 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         }
 
     }
+
+
+
 }
