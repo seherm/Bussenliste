@@ -52,11 +52,13 @@ public class PlayersAdapter extends BaseAdapter {
         final TextView nameTextView = convertView.findViewById(R.id.player_name);
         final TextView fineTextView = convertView.findViewById(R.id.fine_sum);
 
-        if(player.getPhoto() != null){
-            imageView.setImageBitmap(player.getPhoto());
-        }
         nameTextView.setText(player.getName());
         fineTextView.setText(context.getString(R.string.fineAmount, player.getTotalSumOfFines()));
+        if(player.getPhoto() != null){
+            imageView.setImageBitmap(player.getPhoto());
+        }else{
+            imageView.setImageResource(R.drawable.player);
+        }
 
         return convertView;
     }
