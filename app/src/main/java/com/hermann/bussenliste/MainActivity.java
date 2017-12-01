@@ -211,7 +211,8 @@ public class MainActivity extends AppCompatActivity {
                 String playerName = String.valueOf(editText.getText());
 
                 if (!dataSourcePlayer.hasPlayer(playerName) && !isEmptyText) {
-                    dataSourcePlayer.createPlayer(playerName);
+                    Player player = new Player(playerName);
+                    dataSourcePlayer.createPlayer(player);
                     playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
                     Toast.makeText(getApplicationContext(), R.string.added_player, Toast.LENGTH_LONG).show();
                     dialog.dismiss();
@@ -280,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject obj = (JSONObject) arr.get(i);
                             if (obj.get("table").toString().equals("players")) {
-                                dataSourcePlayer.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                dataSourcePlayer.updateSyncStatus(obj.get("name").toString(), obj.get("status").toString());
                             } else if (obj.get("table").toString().equals("fines")) {
                                 dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
                             }
@@ -355,16 +356,17 @@ public class MainActivity extends AppCompatActivity {
                             String playerFines = obj.get("playerFines").toString();
 
                             if (!dataSourcePlayer.hasPlayer(playerName)) {
-                                long id = dataSourcePlayer.createPlayer(playerName);
-                                Player currentPlayer = dataSourcePlayer.getPlayer(id);
+                                Player player = new Player(playerName);
                                 if (playerFines != null) {
-                                    Type type = new TypeToken<ArrayList<Fine>>() {
-                                    }.getType();
-                                    Gson gson = new GsonBuilder().create();
-                                    ArrayList<Fine> finesList = gson.fromJson(playerFines, type);
-                                    currentPlayer.setFines(finesList);
-                                    dataSourcePlayer.updatePlayer(currentPlayer);
+                                   player.setFines(DataSourcePlayer.getFinesList(playerFines));
                                 }
+                                dataSourcePlayer.createPlayer(player);
+                            }else{
+                                Player currentPlayer = dataSourcePlayer.getPlayer(playerName);
+                                if(playerFines != null){
+                                    currentPlayer.setFines(DataSourcePlayer.getFinesList(playerFines));
+                                }
+                                dataSourcePlayer.updatePlayer(currentPlayer);
                             }
                             break;
                         case "fines":
@@ -390,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
     //Navigation
     private void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
-        intent.putExtra("SelectedPlayerId", selectedPlayer.getId());
+        intent.putExtra("SelectedPlayerName", selectedPlayer.getName());
         startActivity(intent);
     }
 

@@ -199,7 +199,8 @@ public class ImportDataActivity extends AppCompatActivity {
 
                 if (sheetIndex == 0) {
                     String name = columns[0];
-                    dataSourcePlayer.createPlayer(name);
+                    Player player = new Player(name);
+                    dataSourcePlayer.createPlayer(player);
                 } else {
                     String description = columns[0];
                     int amount = (int) Double.parseDouble(columns[1].trim());

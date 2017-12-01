@@ -35,23 +35,35 @@ public class DataSourcePlayer {
         dbHelper = new DatabaseHelper(context);
     }
 
-    public long createPlayer(String name) {
+    public long createPlayer(Player player) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_NAME, name);
+        values.put(DatabaseHelper.COLUMN_NAME, player.getName());
         values.put(DatabaseHelper.COLUMN_UPDATE_STATUS, "no");
+
+        if (player.getFines() != null) {
+            if (!player.getFines().isEmpty()) {
+                String fines = getFinesJSON(player.getFines());
+                values.put(DatabaseHelper.COLUMN_FINES, fines);
+            }
+        }
+
+        if (player.getPhoto() != null) {
+            byte[] photo = getBytes(player.getPhoto());
+            values.put(DatabaseHelper.COLUMN_PHOTO, photo);
+        }
 
         long insertId = database.insert(DatabaseHelper.TABLE_PLAYERS, null, values);
 
         return insertId;
     }
 
-    public Player getPlayer(long player_id) {
+    public Player getPlayer(String playerName) {
         SQLiteDatabase database = dbHelper.getReadableDatabase();
 
         String selectQuery = "SELECT * FROM " + DatabaseHelper.TABLE_PLAYERS + " WHERE "
-                + DatabaseHelper.COLUMN_ID + " = " + player_id;
+                + DatabaseHelper.COLUMN_NAME + " = " + "'" + playerName + "'";
 
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor != null)
@@ -69,17 +81,13 @@ public class DataSourcePlayer {
 
         Player player = new Player(id, name);
 
-        //Set Fines
-        Type type = new TypeToken<ArrayList<Fine>>() {
-        }.getType();
-        Gson gson = new Gson();
-        ArrayList<Fine> finesList = gson.fromJson(fines, type);
-        if (finesList != null) {
-            player.setFines(finesList);
+        //Set fines
+        if (fines != null) {
+            player.setFines(getFinesList(fines));
         }
 
         //Set photo
-        if(photo != null){
+        if (photo != null) {
             player.setPhoto(getImage(photo));
         }
 
@@ -89,14 +97,22 @@ public class DataSourcePlayer {
     public int updatePlayer(Player player) throws JSONException {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
-        Gson gson = new Gson();
-        String fines = gson.toJson(player.getFines());
-        byte[] photo = getBytes(player.getPhoto());
         long id = player.getId();
 
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_FINES, fines);
-        values.put(DatabaseHelper.COLUMN_PHOTO, photo);
+
+        if (player.getFines() != null) {
+            if (!player.getFines().isEmpty()) {
+                String fines = getFinesJSON(player.getFines());
+                values.put(DatabaseHelper.COLUMN_FINES, fines);
+            }
+        }
+
+        if (player.getPhoto() != null) {
+            byte[] photo = getBytes(player.getPhoto());
+            values.put(DatabaseHelper.COLUMN_PHOTO, photo);
+        }
+
         values.put(DatabaseHelper.COLUMN_UPDATE_STATUS, "no");
 
         return database.update(DatabaseHelper.TABLE_PLAYERS,
@@ -128,16 +144,12 @@ public class DataSourcePlayer {
                 Player player = new Player(id, name);
 
                 //Set fines
-                Type type = new TypeToken<ArrayList<Fine>>() {
-                }.getType();
-                Gson gson = new Gson();
-                ArrayList<Fine> finesList = gson.fromJson(fines, type);
-                if (finesList != null) {
-                    player.setFines(finesList);
+                if (fines != null) {
+                    player.setFines(getFinesList(fines));
                 }
 
                 //Set photo
-                if(photo != null){
+                if (photo != null) {
                     player.setPhoto(getImage(photo));
                 }
 
@@ -181,9 +193,9 @@ public class DataSourcePlayer {
         return count;
     }
 
-    public void updateSyncStatus(String id, String status) {
+    public void updateSyncStatus(String name, String status) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        String updateQuery = "Update players SET updateStatus = '" + status + "' WHERE _id=" + "'" + id + "'";
+        String updateQuery = "Update players SET updateStatus = '" + status + "' WHERE name=" + "'" + name + "'";
         database.execSQL(updateQuery);
     }
 
@@ -201,17 +213,26 @@ public class DataSourcePlayer {
 
 
     public static byte[] getBytes(Bitmap bitmap) {
-        if(bitmap != null){
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-            return stream.toByteArray();
-        }else {
-            return null;
-        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+        return stream.toByteArray();
     }
 
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    public static ArrayList<Fine> getFinesList(String finesJSON) {
+        Type type = new TypeToken<ArrayList<Fine>>() {
+        }.getType();
+        Gson gson = new Gson();
+        ArrayList<Fine> finesList = gson.fromJson(finesJSON, type);
+        return finesList;
+    }
+
+    public static String getFinesJSON(ArrayList<Fine> fines) {
+        Gson gson = new Gson();
+        return gson.toJson(fines);
     }
 }

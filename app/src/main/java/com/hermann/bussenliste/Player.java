@@ -7,11 +7,15 @@ import java.util.ArrayList;
 
 public class Player {
 
-    private final long id;
-    private final String name;
+    private long id;
+    private String name;
     private ArrayList<Fine> fines;
     private Bitmap photo;
 
+    public Player(String name) {
+        this.name = name;
+        this.fines = new ArrayList<>();
+    }
 
     public Player(long id, String name) {
         this.id = id;

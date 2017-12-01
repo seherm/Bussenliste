@@ -91,8 +91,8 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         dataSourcePlayer = new DataSourcePlayer(this);
         dataSourceFine = new DataSourceFine(this);
 
-        long selectedPlayerId = getIntent().getLongExtra("SelectedPlayerId",0);
-        selectedPlayer = dataSourcePlayer.getPlayer(selectedPlayerId);
+        String selectedPlayerName = getIntent().getStringExtra("SelectedPlayerName");
+        selectedPlayer = dataSourcePlayer.getPlayer(selectedPlayerName);
         playerNameTextView.setText(selectedPlayer.getName());
 
         updateUI();
