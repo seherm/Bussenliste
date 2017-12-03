@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -23,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog uploadingProgressDialog;
     private ProgressDialog downloadingProgressDialog;
     private PlayersAdapter playersAdapter;
+    private List<Player> players;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         dataSourcePlayer = new DataSourcePlayer(this);
         dataSourceFine = new DataSourceFine(this);
+        players = dataSourcePlayer.getAllPlayers();
 
         uploadingProgressDialog = new ProgressDialog(this);
         uploadingProgressDialog.setTitle(getString(R.string.uploading_data_to_remote_server));
@@ -68,8 +73,11 @@ public class MainActivity extends AppCompatActivity {
             showImportDataDialog();
         }
 
+        TextView totalFinesSumTextView = findViewById(R.id.totalFinesSum);
+        totalFinesSumTextView.setText(getString(R.string.fineAmount, getTotalFinesSum()));
+
         //initialize players view
-        final GridView gridView = (GridView) findViewById(R.id.players);
+        final GridView gridView = findViewById(R.id.players);
         playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
         gridView.setAdapter(playersAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -163,6 +171,14 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean noFines() {
         return dataSourceFine.getAllFines().isEmpty();
+    }
+
+    private int getTotalFinesSum(){
+        int sum = 0;
+        for(Player player : players){
+            sum += player.getTotalSumOfFines();
+        }
+        return sum;
     }
 
     private void showImportDataDialog() {
@@ -272,18 +288,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (params.has("playersJSON") || params.has("finesJSON")) {
             uploadingProgressDialog.show();
-            client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new AsyncHttpResponseHandler() {
+            client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new TextHttpResponseHandler() {
                 @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                public void onSuccess(int statusCode, Header[] headers, String responseBody) {
                     uploadingProgressDialog.hide();
                     try {
-                        JSONArray arr = new JSONArray(new String(responseBody));
+                        JSONArray arr = new JSONArray(responseBody);
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject obj = (JSONObject) arr.get(i);
                             if (obj.get("table").toString().equals("players")) {
                                 dataSourcePlayer.updateSyncStatus(obj.get("name").toString(), obj.get("status").toString());
                             } else if (obj.get("table").toString().equals("fines")) {
-                                dataSourceFine.updateSyncStatus(obj.get("id").toString(), obj.get("status").toString());
+                                dataSourceFine.updateSyncStatus(obj.get("description").toString(), obj.get("status").toString());
                             }
                         }
                         Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
@@ -294,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable error) {
                     uploadingProgressDialog.hide();
                     if (statusCode == 404) {
                         Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
@@ -354,18 +370,23 @@ public class MainActivity extends AppCompatActivity {
                             String playerId = obj.get("playerId").toString();
                             String playerName = obj.get("playerName").toString();
                             String playerFines = obj.get("playerFines").toString();
+                            byte[] playerPhoto = Base64.decode(obj.get("playerPhoto").toString(),Base64.DEFAULT);
 
                             if (!dataSourcePlayer.hasPlayer(playerName)) {
                                 Player player = new Player(playerName);
                                 if (playerFines != null) {
                                    player.setFines(DataSourcePlayer.getFinesList(playerFines));
                                 }
+
+                                player.setPhoto(DataSourcePlayer.getImage(playerPhoto));
+
                                 dataSourcePlayer.createPlayer(player);
                             }else{
                                 Player currentPlayer = dataSourcePlayer.getPlayer(playerName);
                                 if(playerFines != null){
                                     currentPlayer.setFines(DataSourcePlayer.getFinesList(playerFines));
                                 }
+                                currentPlayer.setPhoto(DataSourcePlayer.getImage(playerPhoto));
                                 dataSourcePlayer.updatePlayer(currentPlayer);
                             }
                             break;

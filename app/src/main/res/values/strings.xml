@@ -46,6 +46,7 @@
     <string name="take_new_photo">Take new photo</string>
     <string name="error_camera_permission">Camera Permission Error</string>
 
+
     <string-array name="select_photo_items_array">
         <item>@string/take_new_photo</item>
         <item>@string/select_new_photo</item>

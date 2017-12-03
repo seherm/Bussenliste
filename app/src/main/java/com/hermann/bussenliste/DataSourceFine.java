@@ -134,9 +134,9 @@ public class DataSourceFine {
         return count;
     }
 
-    public void updateSyncStatus(String id, String status) {
+    public void updateSyncStatus(String description, String status) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        String updateQuery = "Update fines set updateStatus = '" + status + "' where _id=" + "'" + id + "'";
+        String updateQuery = "Update fines set updateStatus = '" + status + "' WHERE description=" + "'" + description + "'";
         database.execSQL(updateQuery);
     }
 }

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -169,7 +170,7 @@ public class DataSourcePlayer {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<>();
         SQLiteDatabase database = dbHelper.getReadableDatabase();
-        String selectQuery = "SELECT  * FROM  players WHERE updateStatus = '" + "no" + "'";
+        String selectQuery = "SELECT * FROM  players WHERE updateStatus = '" + "no" + "'";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
             do {
@@ -177,10 +178,11 @@ public class DataSourcePlayer {
                 map.put("playerId", cursor.getString(0));
                 map.put("playerName", cursor.getString(1));
                 map.put("playerFines", cursor.getString(2));
+                map.put("playerPhoto", getString(cursor.getBlob(3)));
                 wordList.add(map);
             } while (cursor.moveToNext());
         }
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().serializeNulls().create();
         return gson.toJson(wordList);
     }
 
@@ -221,6 +223,14 @@ public class DataSourcePlayer {
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    public static String getString (byte[] image){
+        if (image == null){
+            return null;
+        }else{
+            return Base64.encodeToString(image, Base64.DEFAULT);
+        }
     }
 
     public static ArrayList<Fine> getFinesList(String finesJSON) {
