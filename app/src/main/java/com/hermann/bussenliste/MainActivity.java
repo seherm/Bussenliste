@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private DataSourceFine dataSourceFine;
     private ProgressDialog uploadingProgressDialog;
     private ProgressDialog downloadingProgressDialog;
+    private TextView totalFinesSumTextView;
     private PlayersAdapter playersAdapter;
     private List<Player> players;
 
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             showImportDataDialog();
         }
 
-        TextView totalFinesSumTextView = findViewById(R.id.totalFinesSum);
+        totalFinesSumTextView = findViewById(R.id.totalFinesSum);
         totalFinesSumTextView.setText(getString(R.string.fineAmount, getTotalFinesSum()));
 
         //initialize players view
@@ -403,7 +404,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 //Refresh UI
-                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+                players = dataSourcePlayer.getAllPlayers();
+                playersAdapter.refresh(players);
+                totalFinesSumTextView.setText(getString(R.string.fineAmount, getTotalFinesSum()));
             }
         } catch (JSONException e) {
             e.printStackTrace();
