@@ -29,8 +29,10 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/player_image"
-                android:layout_width="match_parent"
+                android:layout_width="80dp"
                 android:layout_height="80dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:src="@drawable/player" />
 
             <TextView

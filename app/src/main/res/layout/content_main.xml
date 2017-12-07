@@ -8,17 +8,40 @@
     tools:context="com.hermann.bussenliste.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:id="@+id/totalFinesSum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/guideline"
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline">
 
+        <ImageView
+            android:id="@+id/piggy_bank_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:paddingTop="5dp"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_piggy_bank" />
+
+
+        <TextView
+            android:id="@+id/totalFinesSum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/piggy_bank_image"
+            android:layout_alignLeft="@+id/piggy_bank_image"
+            android:layout_alignRight="@+id/piggy_bank_image"
+            android:layout_alignTop="@+id/piggy_bank_image"
+            android:paddingTop="25dp"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
