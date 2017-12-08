@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
                             // Insert player into local SQLite DB
                             String playerId = obj.get("playerId").toString();
                             String playerName = obj.get("playerName").toString();
-                            String playerFines = obj.get("playerFines").toString();
+                            String playerFines = obj.get("playerFines").toString().trim();
                             byte[] playerPhoto = Base64.decode(obj.get("playerPhoto").toString(),Base64.DEFAULT);
 
                             if (!dataSourcePlayer.hasPlayer(playerName)) {
