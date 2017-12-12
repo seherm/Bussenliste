@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -31,8 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -155,8 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 showCreateNewPlayerDialog();
                 return true;
             case R.id.action_sync:
-                uploadDataToServer();
-                downloadDataFromServer();
+                syncDataWithServer();
                 return true;
             case R.id.action_import:
                 goToImportDataPage();
@@ -267,8 +263,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //Method to upload table entries from local SQLite DB to online MySQL DB
-    private void uploadDataToServer() {
+    //Method to first upload table entries from local SQLite DB to online MySQL DB if necessery and download entries afterwards
+    private void syncDataWithServer() {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         List<Player> playerList = dataSourcePlayer.getAllPlayers();
@@ -276,9 +272,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (playerList.isEmpty() && finesList.isEmpty()) {
             Toast.makeText(getApplicationContext(), R.string.no_data_in_sqlite_db, Toast.LENGTH_LONG).show();
+            downloadDataFromServer();
         }
         if (dataSourcePlayer.dbSyncCount() == 0 && dataSourceFine.dbSyncCount() == 0) {
             Toast.makeText(getApplicationContext(), R.string.no_data_to_upload, Toast.LENGTH_LONG).show();
+            downloadDataFromServer();
         }
         if (dataSourcePlayer.dbSyncCount() != 0) {
             params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
@@ -304,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                         Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
+                        downloadDataFromServer();
                     } catch (JSONException e) {
                         Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
                         e.printStackTrace();
