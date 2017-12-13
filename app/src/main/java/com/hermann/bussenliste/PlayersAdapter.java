@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Collections;
 import java.util.List;
 
 public class PlayersAdapter extends BaseAdapter {
@@ -65,6 +66,7 @@ public class PlayersAdapter extends BaseAdapter {
 
     public void refresh(List<Player> players){
         this.players = players;
+        Collections.sort(players);
         notifyDataSetChanged();
     }
 

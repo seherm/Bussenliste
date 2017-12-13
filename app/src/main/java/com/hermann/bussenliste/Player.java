@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Player {
+public class Player implements Comparable<Player> {
 
     private long id;
     private String name;
@@ -66,5 +66,10 @@ public class Player {
 
     public void addFine(Fine fine) {
         fines.add(fine);
+    }
+
+    @Override
+    public int compareTo(Player player) {
+        return this.name.compareTo(player.getName());
     }
 }
