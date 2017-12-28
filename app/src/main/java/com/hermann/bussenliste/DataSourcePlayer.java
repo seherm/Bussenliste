@@ -112,6 +112,9 @@ public class DataSourcePlayer {
         if (player.getPhoto() != null) {
             byte[] photo = getBytes(player.getPhoto());
             values.put(DatabaseHelper.COLUMN_PHOTO, photo);
+        }else{
+            //delete photo
+            values.putNull(DatabaseHelper.COLUMN_PHOTO);
         }
 
         values.put(DatabaseHelper.COLUMN_UPDATE_STATUS, "no");

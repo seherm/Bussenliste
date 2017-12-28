@@ -199,12 +199,14 @@ public class PlayerDetailsActivity extends AppCompatActivity {
 
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        int scaleFactor = 15;
+                        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth()/scaleFactor, bitmap.getHeight()/scaleFactor,false);
                         setPlayerPhoto(bitmap);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
-                } // ACTION_TAKE_PHOTO
+                } // ACTION_PICK_PHOTO
             } // switch
         }
     }
@@ -424,11 +426,12 @@ public class PlayerDetailsActivity extends AppCompatActivity {
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
+        //int photoW = bmOptions.outWidth;
+        //int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        //int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        int scaleFactor = 15;
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
