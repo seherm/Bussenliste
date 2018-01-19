@@ -106,6 +106,8 @@ public class DataSourcePlayer {
             if (!player.getFines().isEmpty()) {
                 String fines = getFinesJSON(player.getFines());
                 values.put(DatabaseHelper.COLUMN_FINES, fines);
+            }else{
+                values.putNull(DatabaseHelper.COLUMN_FINES);
             }
         }
 
