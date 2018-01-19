@@ -30,6 +30,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         dataSourcePlayer = new DataSourcePlayer(this);
         dataSourceFine = new DataSourceFine(this);
         players = dataSourcePlayer.getAllPlayers();
+        Collections.sort(players);
 
         uploadingProgressDialog = new ProgressDialog(this);
         uploadingProgressDialog.setTitle(getString(R.string.uploading_data_to_remote_server));
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize players view
         final GridView gridView = findViewById(R.id.players);
-        playersAdapter = new PlayersAdapter(this, dataSourcePlayer.getAllPlayers());
+        playersAdapter = new PlayersAdapter(this, players);
         gridView.setAdapter(playersAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
