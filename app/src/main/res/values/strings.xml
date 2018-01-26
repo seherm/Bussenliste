@@ -8,7 +8,8 @@
     <string name="add_fair">Add a new Fair</string>
     <string name="delete_text">Delete</string>
     <string name="action_create_player">Create new Player</string>
-    <string name="action_create_fine">Create new Fine</string>
+    <string name="action_edit_fines">Edit fines</string>
+    <string name="edit_fine">Edit Fine</string>
     <string name="fineAmount">%1$d CHF</string>
     <string name="back">Back</string>
     <string name="memory">Memory</string>
@@ -39,7 +40,7 @@
     <string name="no_data_to_upload">No data to upload</string>
     <string name="data_downloaded">Data downloaded</string>
     <string name="deleted_fines">Selected fines deleted</string>
-    <string name="action_add_photo">Change player photo</string>
+    <string name="action_change_photo">Change player photo</string>
     <string name="change_photo">Change photo</string>
     <string name="select_new_photo">Select new photo</string>
     <string name="delete_photo">Delete photo</string>
@@ -56,5 +57,11 @@
         <item>@string/select_new_photo</item>
         <item>@string/delete_photo</item>
     </string-array>
+    <string name="title_fine_list">Fines</string>
+    <string name="title_fine_detail">Fine Detail</string>
+    <string name="action_delete_player">Delete Player</string>
+    <string name="create_fine">Create new fine</string>
+    <string name="action_save_fine_change">Save</string>
+    <string name="action_delete_fine">Delete fine</string>
 
 </resources>

@@ -10,12 +10,17 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -154,6 +159,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_create_player:
                 showCreateNewPlayerDialog();
                 return true;
+            case R.id.action_edit_fines:
+                goToEditFinesPage();
+                return true;
             case R.id.action_sync:
                 syncDataWithServer();
                 return true;
@@ -204,9 +212,10 @@ public class MainActivity extends AppCompatActivity {
     private void showCreateNewPlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.action_create_player);
-        final EditText editText = new EditText(this);
-        editText.setHint(R.string.name);
-        builder.setView(editText);
+        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.input_dialog_new_player, null);
+        builder.setView(promptView);
+        final EditText editText = promptView.findViewById(R.id.create_player);
         builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -419,6 +428,11 @@ public class MainActivity extends AppCompatActivity {
     private void goToPlayerDetailsPage(Player selectedPlayer) {
         Intent intent = new Intent(this, PlayerDetailsActivity.class);
         intent.putExtra("SelectedPlayerName", selectedPlayer.getName());
+        startActivity(intent);
+    }
+
+    private void goToEditFinesPage() {
+        Intent intent = new Intent(this, FineListActivity.class);
         startActivity(intent);
     }
 

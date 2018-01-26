@@ -5,16 +5,16 @@
     tools:context="com.hermann.bussenliste.MainActivity">
 
     <item
-        android:id="@+id/action_change_photo"
+        android:id="@+id/action_save_fine_change"
         android:orderInCategory="1"
-        android:title="@string/action_change_photo"
+        android:title="@string/action_save_fine_change"
         app:icon="@drawable/ic_add"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/action_delete_player"
+        android:id="@+id/action_delete_fine"
         android:orderInCategory="1"
-        android:title="@string/action_delete_player"
-        app:showAsAction="never"
-        app:icon="@drawable/ic_delete"/>
+        android:title="@string/action_delete_fine"
+        app:icon="@drawable/ic_delete"
+        app:showAsAction="never" />
 </menu>

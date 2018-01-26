@@ -3,6 +3,7 @@
     package="com.hermann.bussenliste">
 
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -49,6 +50,23 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.hermann.bussenliste.MainActivity" />
         </activity>
+        <activity
+            android:name=".FineListActivity"
+            android:label="@string/title_fine_list"
+            android:theme="@style/BussenlisteTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hermann.bussenliste.MainActivity" />
+        </activity>
+        <activity
+            android:name=".FineDetailActivity"
+            android:label="@string/title_fine_detail"
+            android:theme="@style/BussenlisteTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hermann.bussenliste.FineListActivity" />
+        </activity>
+
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -57,9 +75,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:resource="@xml/file_paths" />
         </provider>
-
     </application>
 
 </manifest>

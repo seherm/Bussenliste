@@ -32,6 +32,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import org.json.JSONException;
 
 import java.io.File;
@@ -41,11 +47,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
+
 public class PlayerDetailsActivity extends AppCompatActivity {
 
     private static final int TAKE_IMAGE_REQUEST = 1;
     private static final int PICK_IMAGE_REQUEST = 2;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+
+    private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
 
     private ArrayList<Fine> selectedItems;
     private Player selectedPlayer;
@@ -171,10 +181,10 @@ public class PlayerDetailsActivity extends AppCompatActivity {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-            case R.id.action_create_fine:
-                showCreateNewFineDialog();
+            case R.id.action_delete_player:
+                deletePlayer();
                 return true;
-            case R.id.action_add_photo:
+            case R.id.action_change_photo:
                 showAddPhotoDialog();
                 return true;
         }
@@ -223,38 +233,6 @@ public class PlayerDetailsActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    private void showCreateNewFineDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText descriptionBox = new EditText(this);
-        descriptionBox.setHint(R.string.fineDescription);
-        layout.addView(descriptionBox);
-        final EditText amountBox = new EditText(this);
-        amountBox.setHint(R.string.fineAmountText);
-        amountBox.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
-        layout.addView(amountBox);
-        builder.setTitle(R.string.action_create_fine);
-        builder.setView(layout);
-        builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String fineDescription = String.valueOf(descriptionBox.getText());
-                String fineAmount = String.valueOf(amountBox.getText());
-                dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
-            }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        builder.show();
     }
 
     private void showAddPhotoDialog() {
@@ -513,5 +491,33 @@ public class PlayerDetailsActivity extends AppCompatActivity {
 
     }
 
+    private void deletePlayer(){
+        dataSourcePlayer.deletePlayer(selectedPlayer.getId());
+        //Delete player in remote MySQL DB
+        deletePlayerOnServer(selectedPlayer);
+    }
 
+    private void deletePlayerOnServer(Player player) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        Gson gson = new GsonBuilder().create();
+        params.put("playersJSON", gson.toJson(player.getName()));
+        client.post(PRODUCTION_SERVER_ADDRESS + "deleteplayer.php", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
+                } else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
 }

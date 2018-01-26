@@ -44,13 +44,15 @@ public class DataSourceFine {
         return insertId;
     }
 
-    private Fine getFine(long fine_id) {
+    public Fine getFine(long fine_id) {
         SQLiteDatabase database = dbHelper.getReadableDatabase();
 
         String selectQuery = "SELECT  * FROM " + DatabaseHelper.TABLE_FINES + " WHERE "
                 + DatabaseHelper.COLUMN_ID + " = " + fine_id;
 
         Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor != null)
+            cursor.moveToFirst();
 
         int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID);
         int idDescription = cursor.getColumnIndex(DatabaseHelper.COLUMN_DESCRIPTION);
