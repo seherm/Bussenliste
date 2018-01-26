@@ -67,6 +67,22 @@ public class DataSourceFine {
         return new Fine(id, description, amount, date);
     }
 
+    public int updateFine(Fine fine){
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        long id = fine.getId();
+
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_DESCRIPTION, fine.getDescription());
+        values.put(DatabaseHelper.COLUMN_AMOUNT, fine.getAmount());
+        values.put(DatabaseHelper.COLUMN_UPDATE_STATUS, "no");
+
+        return database.update(DatabaseHelper.TABLE_FINES,
+                values,
+                DatabaseHelper.COLUMN_ID + "=" + id,
+                null);
+    }
+
     public List<Fine> getAllFines() {
         List<Fine> finesList = new ArrayList<>();
 

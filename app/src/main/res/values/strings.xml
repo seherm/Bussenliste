@@ -27,7 +27,10 @@
     <string name="deleted_players">Selected players deleted</string>
     <string name="added_player">Player added</string>
     <string name="empty_player">Please enter a valid name!</string>
+    <string name="empty_fine_description">Please enter a description!</string>
+    <string name="empty_fine_amount">Please enter an amount!</string>
     <string name="already_added_player">A player with this name already exists!</string>
+    <string name="already_added_fine">A fine with this description already exists!</string>
     <string name="requested_resource_not_found">Requested resource not found</string>
     <string name="something_went_wrong_at_server_end">Something went wrong at server end</string>
     <string name="unexpected_error">Unexpected Error occurred! Most common Error: Device might not be connected to Internet.</string>

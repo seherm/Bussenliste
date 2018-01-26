@@ -1,21 +1,14 @@
 package com.hermann.bussenliste;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.Toolbar;
-import android.text.InputType;
-import android.view.Menu;
-import android.view.View;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+
 
 /**
  * An activity representing a single Fine detail screen. This
@@ -37,6 +30,7 @@ public class FineDetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_close);
         }
 
         // savedInstanceState is non-null when there is fragment state
@@ -75,15 +69,20 @@ public class FineDetailActivity extends AppCompatActivity {
         switch (id) {
 
             case android.R.id.home:
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. Use NavUtils to allow users
-            // to navigate up one level in the application structure. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
-            NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
-            return true;
+                NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
+                return true;
+            case R.id.action_save_fine_change:
+                FineDetailFragment currentFragment = (FineDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fine_detail_container);
+                Fine currentFine =  currentFragment.getCurrentFine();
+                if (!currentFine.getDescription().isEmpty() && currentFine.getAmount() != 0) {
+                    DataSourceFine dataSourceFine = new DataSourceFine(this);
+                    dataSourceFine.updateFine(currentFine);
+                    NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
+                }
+                return true;
+            case R.id.action_delete_fine:
+                //TODO:delete fine
+                return true;
 
         }
 

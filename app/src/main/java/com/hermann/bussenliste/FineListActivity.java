@@ -6,21 +6,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -154,31 +151,19 @@ public class FineListActivity extends AppCompatActivity {
     }
 
     private void showCreateNewFineDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        TableLayout.LayoutParams params = new TableLayout.LayoutParams();
-        params.setMargins(60,16,60,16);
-
-        final EditText descriptionBox = new EditText(this);
-        descriptionBox.setHint(R.string.fineDescription);
-        descriptionBox.setLayoutParams(params);
-        layout.addView(descriptionBox);
-        final EditText amountBox = new EditText(this);
-        amountBox.setHint(R.string.fineAmountText);
-        amountBox.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
-        amountBox.setLayoutParams(params);
-        layout.addView(amountBox);
+        LayoutInflater layoutInflater = LayoutInflater.from(FineListActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.input_dialog_new_fine, null);
         builder.setTitle(R.string.create_fine);
-        builder.setView(layout);
+        builder.setView(promptView);
+        final EditText descriptionBox = promptView.findViewById(R.id.fine_description);
+        final EditText amountBox = promptView.findViewById(R.id.fine_amount);
+
         builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String fineDescription = String.valueOf(descriptionBox.getText());
-                String fineAmount = String.valueOf(amountBox.getText());
-                dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
+
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -187,6 +172,32 @@ public class FineListActivity extends AppCompatActivity {
                 dialogInterface.cancel();
             }
         });
-        builder.show();
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String fineDescription = String.valueOf(descriptionBox.getText());
+                String fineAmount = String.valueOf(amountBox.getText());
+                Boolean isEmptyDescriptionText = (descriptionBox.getText().toString().trim().isEmpty());
+                Boolean isEmptyFineAmountText = (amountBox.getText().toString().trim().isEmpty());
+
+                if (!dataSourceFine.hasFine(fineDescription) && !isEmptyDescriptionText && !isEmptyFineAmountText) {
+                    dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
+                    View recyclerView = findViewById(R.id.fine_list);
+                    assert recyclerView != null;
+                    setupRecyclerView((RecyclerView) recyclerView);
+                    dialog.dismiss();
+                } else if (isEmptyDescriptionText) {
+                    Toast.makeText(getApplicationContext(), R.string.empty_fine_description, Toast.LENGTH_LONG).show();
+                } else if (isEmptyFineAmountText) {
+                    Toast.makeText(getApplicationContext(), R.string.empty_fine_amount, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.already_added_fine, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
     }
 }

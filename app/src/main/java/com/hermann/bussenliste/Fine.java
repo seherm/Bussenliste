@@ -1,13 +1,17 @@
 package com.hermann.bussenliste;
 
-import java.io.Serializable;
-
 public class Fine {
 
-    private final long id;
-    private final String description;
-    private final int amount;
-    private final String date;
+    private long id;
+    private String description;
+    private int amount;
+    private String date;
+
+    public Fine(long id, String description, int amount) {
+        this.id = id;
+        this.description = description;
+        this.amount = amount;
+    }
 
     public Fine(long id, String description, int amount, String date) {
         this.id = id;

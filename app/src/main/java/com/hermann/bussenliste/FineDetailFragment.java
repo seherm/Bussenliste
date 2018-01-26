@@ -1,14 +1,13 @@
 package com.hermann.bussenliste;
 
 import android.app.Activity;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
 
 /**
  * A fragment representing a single Fine detail screen.
@@ -22,6 +21,8 @@ public class FineDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
+    public EditText fineDescription;
+    public EditText fineAmount;
 
     /**
      * The dummy content this fragment is presenting.
@@ -60,11 +61,21 @@ public class FineDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fine_detail, container, false);
 
         if (mItem != null) {
-            ((EditText) rootView.findViewById(R.id.fine_description)).setText(mItem.getDescription());
-            ((EditText) rootView.findViewById(R.id.fine_description)).setSelection(mItem.getDescription().length());
-            ((EditText) rootView.findViewById(R.id.fine_amount)).setText(Integer.toString(mItem.getAmount()));
+
+            fineDescription = rootView.findViewById(R.id.fine_description);
+            fineAmount = rootView.findViewById(R.id.fine_amount);
+            fineDescription.setText(mItem.getDescription());
+            fineDescription.setSelection(mItem.getDescription().length());
+            fineAmount.setText(Integer.toString(mItem.getAmount()));
         }
 
         return rootView;
+    }
+
+    public Fine getCurrentFine() {
+        String description = fineDescription.getText().toString();
+        int amount = Integer.parseInt(fineAmount.getText().toString());
+        Fine currentFine = new Fine(mItem.getId(), description, amount);
+        return currentFine;
     }
 }
