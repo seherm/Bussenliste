@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -20,25 +19,12 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.TextHttpResponseHandler;
-
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.List;
 
-import cz.msebera.android.httpclient.Header;
-
-public class MainActivity extends AppCompatActivity {
-
-    private static final String PRODUCTION_SERVER_ADDRESS = "https://bussenliste.000webhostapp.com/";
+public class MainActivity extends AppCompatActivity implements OnDeleteListener, OnDownloadListener, OnUploadListener {
 
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
@@ -52,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         dataSourcePlayer = new DataSourcePlayer(this);
@@ -109,9 +95,6 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = (selected.size() - 1); i >= 0; i--) {
                             if (selected.valueAt(i)) {
                                 Player selectedItem = playersAdapter.getItem(selected.keyAt(i));
-                                //Delete player in SQLite DB
-                                dataSourcePlayer.deletePlayer(selectedItem.getId());
-                                playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
                                 //Delete player in remote MySQL DB
                                 deletePlayerOnServer(selectedItem);
                             }
@@ -158,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 goToEditFinesPage();
                 return true;
             case R.id.action_sync:
-                syncDataWithServer();
+                uploadDataToServer();
                 return true;
             case R.id.action_import:
                 goToImportDataPage();
@@ -176,9 +159,9 @@ public class MainActivity extends AppCompatActivity {
         return dataSourceFine.getAllFines().isEmpty();
     }
 
-    private int getTotalFinesSum(){
+    private int getTotalFinesSum() {
         int sum = 0;
-        for(Player player : players){
+        for (Player player : players) {
             sum += player.getTotalSumOfFines();
         }
         return sum;
@@ -246,178 +229,87 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deletePlayerOnServer(Player player) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        Gson gson = new GsonBuilder().create();
-        params.put("playersJSON", gson.toJson(player.getName()));
-        client.post(PRODUCTION_SERVER_ADDRESS + "deleteplayer.php", params, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                Toast.makeText(getApplicationContext(), R.string.deleted_players, Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
-                } else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        ServerTask serverTask = new ServerTask(this, this, this, this);
+        serverTask.deletePlayer(player);
     }
 
-
-    //Method to first upload table entries from local SQLite DB to online MySQL DB if necessery and download entries afterwards
-    private void syncDataWithServer() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        List<Player> playerList = dataSourcePlayer.getAllPlayers();
-        List<Fine> finesList = dataSourceFine.getAllFines();
-
-        if (playerList.isEmpty() && finesList.isEmpty()) {
-            Toast.makeText(getApplicationContext(), R.string.no_data_in_sqlite_db, Toast.LENGTH_LONG).show();
-            downloadDataFromServer();
-        }
-        if (dataSourcePlayer.dbSyncCount() == 0 && dataSourceFine.dbSyncCount() == 0) {
-            Toast.makeText(getApplicationContext(), R.string.no_data_to_upload, Toast.LENGTH_LONG).show();
-            downloadDataFromServer();
-        }
-        if (dataSourcePlayer.dbSyncCount() != 0) {
-            params.put("playersJSON", dataSourcePlayer.composeJSONfromSQLite());
-        }
-        if (dataSourceFine.dbSyncCount() != 0) {
-            params.put("finesJSON", dataSourceFine.composeJSONfromSQLite());
-        }
-
-        if (params.has("playersJSON") || params.has("finesJSON")) {
-            uploadingProgressDialog.show();
-            client.post(PRODUCTION_SERVER_ADDRESS + "insertdata.php", params, new TextHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseBody) {
-                    uploadingProgressDialog.hide();
-                    try {
-                        JSONArray arr = new JSONArray(responseBody);
-                        for (int i = 0; i < arr.length(); i++) {
-                            JSONObject obj = (JSONObject) arr.get(i);
-                            if (obj.get("table").toString().equals("players")) {
-                                dataSourcePlayer.updateSyncStatus(obj.get("name").toString(), obj.get("status").toString());
-                            } else if (obj.get("table").toString().equals("fines")) {
-                                dataSourceFine.updateSyncStatus(obj.get("description").toString(), obj.get("status").toString());
-                            }
-                        }
-                        Toast.makeText(getApplicationContext(), R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
-                        downloadDataFromServer();
-                    } catch (JSONException e) {
-                        Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable error) {
-                    uploadingProgressDialog.hide();
-                    if (statusCode == 404) {
-                        Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
-                    } else if (statusCode == 500) {
-                        Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-        }
-    }
-
-    //Method to download table entries from online MySQL DB and load it into local SQLite DB
     private void downloadDataFromServer() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
+        ServerTask serverTask = new ServerTask(this, this, this, this);
         downloadingProgressDialog.show();
-        // Make Http call to getdata.php
-        client.post(PRODUCTION_SERVER_ADDRESS + "getdata.php", params, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                // Update SQLite DB with response sent by getplayers.php
-                downloadingProgressDialog.hide();
-                updateSQLiteData(new String(responseBody));
-                Toast.makeText(getApplicationContext(), R.string.data_downloaded, Toast.LENGTH_LONG).show();
-            }
-
-            //When error occurred
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                downloadingProgressDialog.hide();
-                if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
-                } else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        serverTask.getData();
     }
 
-    private void updateSQLiteData(String response) {
-        try {
-            JSONArray array = new JSONArray(response);
-            if (array.length() != 0) {
-                // Loop through each array element
-                for (int i = 0; i < array.length(); i++) {
-                    // Get JSON object
-                    JSONObject obj = (JSONObject) array.get(i);
-                    String tableName = obj.get("table").toString();
+    private void uploadDataToServer() {
+        ServerTask serverTask = new ServerTask(this, this, this, this);
+        uploadingProgressDialog.show();
+        serverTask.putData();
+    }
 
-                    switch (tableName) {
-                        case "players":
-                            // Insert player into local SQLite DB
-                            String playerId = obj.get("playerId").toString();
-                            String playerName = obj.get("playerName").toString();
-                            String playerFines = obj.get("playerFines").toString().trim();
-                            byte[] playerPhoto = Base64.decode(obj.get("playerPhoto").toString(),Base64.DEFAULT);
 
-                            if (!dataSourcePlayer.hasPlayer(playerName)) {
-                                Player player = new Player(playerName);
-                                if (playerFines != null) {
-                                   player.setFines(DataSourcePlayer.getFinesList(playerFines));
-                                }
+    @Override
+    public void deleteTaskCompleted(Player player) {
+        //Delete player in SQLite DB
+        dataSourcePlayer.deletePlayer(player.getId());
+        //Update UI
+        playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+    }
 
-                                player.setPhoto(DataSourcePlayer.getImage(playerPhoto));
+    @Override
+    public void deleteTaskFailed(int statusCode) {
+        Toast.makeText(this,R.string.error_player_deletion, Toast.LENGTH_LONG).show();
+    }
 
-                                dataSourcePlayer.createPlayer(player);
-                            }else{
-                                Player currentPlayer = dataSourcePlayer.getPlayer(playerName);
-                                if(playerFines != null){
-                                    currentPlayer.setFines(DataSourcePlayer.getFinesList(playerFines));
-                                }
-                                currentPlayer.setPhoto(DataSourcePlayer.getImage(playerPhoto));
-                                dataSourcePlayer.updatePlayer(currentPlayer);
-                            }
-                            break;
-                        case "fines":
-                            // Insert fine into local SQLite DB
-                            String fineId = obj.get("fineId").toString();
-                            String fineDescription = obj.get("fineDescription").toString();
-                            String fineAmount = obj.get("fineAmount").toString();
+    @Override
+    public void uploadTaskCompleted(String response) {
+        uploadingProgressDialog.hide();
+        Toast.makeText(this,R.string.data_successfully_uploaded,Toast.LENGTH_LONG).show();
+        downloadDataFromServer();
+    }
 
-                            if (!dataSourceFine.hasFine(fineDescription)) {
-                                dataSourceFine.createFine(fineDescription, Integer.parseInt(fineAmount));
-                            }
-                            break;
-                    }
-                }
-                //Refresh UI
-                players = dataSourcePlayer.getAllPlayers();
-                playersAdapter.refresh(players);
-                totalFinesSumTextView.setText(getString(R.string.fineAmount, getTotalFinesSum()));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+    @Override
+    public void uploadTaskFailed(int statusCode) {
+        uploadingProgressDialog.hide();
+        if (statusCode == 404) {
+            Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
+        } else if (statusCode == 500) {
+            Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
         }
     }
+
+    @Override
+    public void updateSQLiteDataFailed(JSONException e) {
+        Toast.makeText(this,R.string.json_error,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void downloadTaskCompleted(String response) {
+        downloadingProgressDialog.hide();
+        Toast.makeText(getApplicationContext(), R.string.data_downloaded, Toast.LENGTH_LONG).show();
+        //Refresh UI
+        players = dataSourcePlayer.getAllPlayers();
+        playersAdapter.refresh(players);
+        totalFinesSumTextView.setText(getString(R.string.fineAmount, getTotalFinesSum()));
+    }
+
+    @Override
+    public void downloadTaskFailed(int statusCode) {
+        downloadingProgressDialog.hide();
+        if (statusCode == 404) {
+            Toast.makeText(getApplicationContext(), R.string.requested_resource_not_found, Toast.LENGTH_LONG).show();
+        } else if (statusCode == 500) {
+            Toast.makeText(getApplicationContext(), R.string.something_went_wrong_at_server_end, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.unexpected_error, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void updateSyncStatusFailed(JSONException e) {
+        Toast.makeText(getApplicationContext(), R.string.json_error, Toast.LENGTH_LONG).show();
+    }
+
 
     //Navigation
     private void goToPlayerDetailsPage(Player selectedPlayer) {

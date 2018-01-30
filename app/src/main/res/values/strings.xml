@@ -66,5 +66,6 @@
     <string name="create_fine">Create new fine</string>
     <string name="action_save_fine_change">Save</string>
     <string name="action_delete_fine">Delete fine</string>
+    <string name="error_player_deletion">Error deleting player. Please try again later!</string>
 
 </resources>
