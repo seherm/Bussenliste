@@ -83,6 +83,12 @@ public class DataSourceFine {
                 null);
     }
 
+    public long deleteFine(long id) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        return db.delete(DatabaseHelper.TABLE_FINES, DatabaseHelper.COLUMN_ID + " = ?",
+                new String[]{Long.toString(id)});
+    }
+
     public List<Fine> getAllFines() {
         List<Fine> finesList = new ArrayList<>();
 

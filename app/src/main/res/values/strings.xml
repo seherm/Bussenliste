@@ -67,5 +67,6 @@
     <string name="action_save_fine_change">Save</string>
     <string name="action_delete_fine">Delete fine</string>
     <string name="error_player_deletion">Error deleting player. Please try again later!</string>
+    <string name="error_fine_deletion">Fine deletion failed. Please try again later!</string>
 
 </resources>

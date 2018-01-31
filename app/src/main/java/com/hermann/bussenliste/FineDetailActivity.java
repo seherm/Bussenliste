@@ -8,6 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import org.json.JSONException;
 
 
 /**
@@ -16,7 +19,9 @@ import android.view.MenuItem;
  * item details are presented side-by-side with a list of items
  * in a {@link FineListActivity}.
  */
-public class FineDetailActivity extends AppCompatActivity {
+public class FineDetailActivity extends AppCompatActivity implements OnServerTaskListener {
+
+    DataSourceFine dataSourceFine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +30,7 @@ public class FineDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
+        dataSourceFine = new DataSourceFine(this);
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -72,16 +78,10 @@ public class FineDetailActivity extends AppCompatActivity {
                 NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
                 return true;
             case R.id.action_save_fine_change:
-                FineDetailFragment currentFragment = (FineDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fine_detail_container);
-                Fine currentFine =  currentFragment.getCurrentFine();
-                if (!currentFine.getDescription().isEmpty() && currentFine.getAmount() != 0) {
-                    DataSourceFine dataSourceFine = new DataSourceFine(this);
-                    dataSourceFine.updateFine(currentFine);
-                    NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
-                }
+                saveFineChanges();
                 return true;
             case R.id.action_delete_fine:
-                //TODO:delete fine
+                deleteFineOnServer(getCurrentFine());
                 return true;
 
         }
@@ -89,4 +89,64 @@ public class FineDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void saveFineChanges() {
+        Fine currentFine = getCurrentFine();
+        if (!currentFine.getDescription().isEmpty() && currentFine.getAmount() != 0) {
+            dataSourceFine.updateFine(currentFine);
+            NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
+        }
+    }
+
+    public Fine getCurrentFine() {
+        FineDetailFragment currentFragment = (FineDetailFragment) getSupportFragmentManager().findFragmentById(R.id.fine_detail_container);
+        return currentFragment.getCurrentFine();
+    }
+
+    public void deleteFineOnServer(Fine fine) {
+        ServerTask serverTask = new ServerTask(this, this);
+        serverTask.deleteFine(fine);
+    }
+
+    @Override
+    public void deleteFineTaskCompleted(Fine fine) {
+        dataSourceFine.deleteFine(fine.getId());
+        NavUtils.navigateUpTo(this, new Intent(this, FineListActivity.class));
+    }
+
+    @Override
+    public void deleteFineTaskFailed(int statusCode) {
+        Toast.makeText(this,R.string.error_fine_deletion, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void deletePlayerTaskCompleted(Player player) {
+    }
+
+    @Override
+    public void deletePlayerTaskFailed(int statusCode) {
+    }
+
+    @Override
+    public void downloadTaskCompleted(String response) {
+    }
+
+    @Override
+    public void downloadTaskFailed(int statusCode) {
+    }
+
+    @Override
+    public void updateSyncStatusFailed(JSONException e) {
+    }
+
+    @Override
+    public void uploadTaskCompleted(String response) {
+    }
+
+    @Override
+    public void uploadTaskFailed(int statusCode) {
+    }
+
+    @Override
+    public void updateSQLiteDataFailed(JSONException e) {
+    }
 }

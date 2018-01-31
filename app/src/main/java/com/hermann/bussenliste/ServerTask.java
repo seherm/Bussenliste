@@ -25,18 +25,13 @@ public class ServerTask {
     private Context context;
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
-    private OnDownloadListener downloadListener;
-    private OnUploadListener uploadListener;
-    private OnDeleteListener deleteListener;
+    private OnServerTaskListener listener;
 
-
-    public ServerTask(Context context, OnDownloadListener downloadListener, OnUploadListener uploadListener, OnDeleteListener deleteListener) {
+    public ServerTask(Context context, OnServerTaskListener listener) {
         this.asyncHttpClient = new AsyncHttpClient();
         this.requestParams = new RequestParams();
         this.context = context;
-        this.downloadListener = downloadListener;
-        this.uploadListener = uploadListener;
-        this.deleteListener = deleteListener;
+        this.listener = listener;
         this.dataSourceFine = new DataSourceFine(context);
         this.dataSourcePlayer = new DataSourcePlayer(context);
     }
@@ -48,13 +43,12 @@ public class ServerTask {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 updateSQLiteData(new String(responseBody));
-                downloadListener.downloadTaskCompleted(new String(responseBody));
             }
 
             //When error occurred
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                downloadListener.downloadTaskFailed(statusCode);
+                listener.downloadTaskFailed(statusCode);
             }
         });
     }
@@ -76,12 +70,11 @@ public class ServerTask {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseBody) {
                     updateSyncStatus(responseBody);
-                    uploadListener.uploadTaskCompleted(responseBody);
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, String responseString, Throwable error) {
-                    uploadListener.uploadTaskFailed(statusCode);
+                    listener.uploadTaskFailed(statusCode);
                 }
             });
         }
@@ -93,19 +86,39 @@ public class ServerTask {
         asyncHttpClient.post(BASE_URL + "deleteplayer.php", requestParams, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                deleteListener.deleteTaskCompleted(player);
+                if (new String(responseBody).equals("true")) {
+                    listener.deletePlayerTaskCompleted(player);
+                } else {
+                    listener.deletePlayerTaskFailed(statusCode);
+                }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                deleteListener.deleteTaskFailed(statusCode);
+                listener.deletePlayerTaskFailed(statusCode);
             }
         });
     }
 
 
-    public void deleteFine(Fine fine) {
+    public void deleteFine(final Fine fine) {
+        Gson gson = new GsonBuilder().create();
+        requestParams.put("finesJSON", gson.toJson(fine.getDescription()));
+        asyncHttpClient.post(BASE_URL + "deletefine.php", requestParams, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if (new String(responseBody).equals("true")) {
+                    listener.deleteFineTaskCompleted(fine);
+                } else {
+                    listener.deleteFineTaskFailed(statusCode);
+                }
+            }
 
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                listener.deleteFineTaskFailed(statusCode);
+            }
+        });
     }
 
 
@@ -159,8 +172,9 @@ public class ServerTask {
                     }
                 }
             }
+            listener.downloadTaskCompleted(response);
         } catch (JSONException e) {
-            uploadListener.updateSQLiteDataFailed(e);
+            listener.updateSQLiteDataFailed(e);
         }
     }
 
@@ -176,8 +190,9 @@ public class ServerTask {
                     dataSourceFine.updateSyncStatus(obj.get("description").toString(), obj.get("status").toString());
                 }
             }
+            listener.uploadTaskCompleted(responseBody);
         } catch (JSONException e) {
-            downloadListener.updateSyncStatusFailed(e);
+            listener.updateSyncStatusFailed(e);
         }
     }
 }

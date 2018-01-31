@@ -24,7 +24,7 @@ import org.json.JSONException;
 import java.util.Collections;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnDeleteListener, OnDownloadListener, OnUploadListener {
+public class MainActivity extends AppCompatActivity implements OnServerTaskListener {
 
     private DataSourcePlayer dataSourcePlayer;
     private DataSourceFine dataSourceFine;
@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnDeleteListener,
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         switch (id) {
             case R.id.action_settings:
                 goToSettingsPage();
@@ -147,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements OnDeleteListener,
                 goToImportDataPage();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -229,40 +227,51 @@ public class MainActivity extends AppCompatActivity implements OnDeleteListener,
     }
 
     private void deletePlayerOnServer(Player player) {
-        ServerTask serverTask = new ServerTask(this, this, this, this);
+        ServerTask serverTask = new ServerTask(this, this);
         serverTask.deletePlayer(player);
     }
 
     private void downloadDataFromServer() {
-        ServerTask serverTask = new ServerTask(this, this, this, this);
+        ServerTask serverTask = new ServerTask(this, this);
         downloadingProgressDialog.show();
         serverTask.getData();
     }
 
     private void uploadDataToServer() {
-        ServerTask serverTask = new ServerTask(this, this, this, this);
+        ServerTask serverTask = new ServerTask(this, this);
         uploadingProgressDialog.show();
         serverTask.putData();
     }
 
 
     @Override
-    public void deleteTaskCompleted(Player player) {
+    public void deletePlayerTaskCompleted(Player player) {
         //Delete player in SQLite DB
         dataSourcePlayer.deletePlayer(player.getId());
         //Update UI
         playersAdapter.refresh(dataSourcePlayer.getAllPlayers());
+        Toast.makeText(this, R.string.deleted_players, Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void deleteTaskFailed(int statusCode) {
-        Toast.makeText(this,R.string.error_player_deletion, Toast.LENGTH_LONG).show();
+    public void deletePlayerTaskFailed(int statusCode) {
+        Toast.makeText(this, R.string.error_player_deletion, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void deleteFineTaskCompleted(Fine fine) {
+
+    }
+
+    @Override
+    public void deleteFineTaskFailed(int statusCode) {
+
     }
 
     @Override
     public void uploadTaskCompleted(String response) {
         uploadingProgressDialog.hide();
-        Toast.makeText(this,R.string.data_successfully_uploaded,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.data_successfully_uploaded, Toast.LENGTH_LONG).show();
         downloadDataFromServer();
     }
 
@@ -280,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements OnDeleteListener,
 
     @Override
     public void updateSQLiteDataFailed(JSONException e) {
-        Toast.makeText(this,R.string.json_error,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.json_error, Toast.LENGTH_LONG).show();
     }
 
     @Override
