@@ -49,4 +49,12 @@
     <string name="title_fine_list">Bussen</string>
     <string name="title_fine_detail">Bussendetails</string>
     <string name="create_fine">Neue Busse hinzufügen</string>
+    <string name="edit_fine">Busse bearbeiten</string>
+    <string name="empty_fine_description">Bitte eine Beschreibung eingeben!</string>
+    <string name="empty_fine_amount">Bitte einen Betrag eingeben!</string>
+    <string name="already_added_fine">Eine Bussen mit dieser Beschreibung existiert bereits!</string>
+    <string name="action_save_fine_change">Speichern</string>
+    <string name="action_delete_fine">Busse löschen</string>
+    <string name="error_player_deletion">Fehler beim Löschen des Spielers. Bitte versuche es später nochmals!</string>
+    <string name="error_fine_deletion">Fehler beim Löschen der Busse. Bitte versuche es später nochmals!</string>
 </resources>
