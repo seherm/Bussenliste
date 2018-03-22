@@ -2,7 +2,9 @@ package com.hermann.bussenliste;
 
 import android.graphics.Bitmap;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Player implements Comparable<Player> {
 
@@ -64,6 +66,7 @@ public class Player implements Comparable<Player> {
     }
 
     public void addFine(Fine fine) {
+        fine.setDate(DateFormat.getDateInstance().format(new Date()));
         fines.add(fine);
     }
 
