@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/BussenlisteTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".unitconverter.activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -27,44 +27,44 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PlayerDetailsActivity"
+            android:name=".unitconverter.activities.PlayerDetailsActivity"
             android:label="@string/title_activity_player_details"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hermann.bussenliste.MainActivity" />
+                android:value=".unitconverter.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".ImportDataActivity"
+            android:name=".unitconverter.activities.ImportDataActivity"
             android:label="@string/title_activity_import_data"
             android:theme="@style/BussenlisteTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hermann.bussenliste.MainActivity" />
+                android:value=".unitconverter.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".unitconverter.activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/BussenlisteTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hermann.bussenliste.MainActivity" />
+                android:value=".unitconverter.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".FineListActivity"
+            android:name=".unitconverter.activities.FineListActivity"
             android:label="@string/title_fine_list"
             android:theme="@style/BussenlisteTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hermann.bussenliste.MainActivity" />
+                android:value=".unitconverter.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".FineDetailActivity"
+            android:name=".unitconverter.activities.FineDetailActivity"
             android:label="@string/title_fine_detail"
             android:theme="@style/BussenlisteTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hermann.bussenliste.FineListActivity" />
+                android:value=".unitconverter.activities.FineListActivity" />
         </activity>
 
 

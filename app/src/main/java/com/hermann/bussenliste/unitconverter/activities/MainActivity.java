@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -18,6 +18,15 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.repository.DataSourcePlayer;
+import com.hermann.bussenliste.common.OnServerTaskListener;
+import com.hermann.bussenliste.unitconverter.adapters.PlayersAdapter;
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.common.ServerTask;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
 
 import org.json.JSONException;
 

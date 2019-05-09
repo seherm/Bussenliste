@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.repository;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,6 +11,9 @@ import android.util.Base64;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
+import com.hermann.bussenliste.repository.DatabaseHelper;
 
 import org.json.JSONException;
 

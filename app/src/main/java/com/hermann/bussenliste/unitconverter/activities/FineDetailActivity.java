@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.unitconverter.fragments.FineDetailFragment;
+import com.hermann.bussenliste.common.OnServerTaskListener;
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.common.ServerTask;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
 
 import org.json.JSONException;
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.hermann.bussenliste.PlayerDetailsActivity">
+    tools:context=".unitconverter.activities.PlayerDetailsActivity">
 
     <include layout="@layout/content_player_details" />
 

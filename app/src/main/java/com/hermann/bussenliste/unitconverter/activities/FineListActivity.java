@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,6 +18,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.unitconverter.fragments.FineDetailFragment;
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.domain.Fine;
 
 import java.util.List;
 

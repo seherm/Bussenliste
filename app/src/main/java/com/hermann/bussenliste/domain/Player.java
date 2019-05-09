@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.domain;
 
 import android.graphics.Bitmap;
 

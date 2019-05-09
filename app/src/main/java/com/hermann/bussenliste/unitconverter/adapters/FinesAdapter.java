@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.adapters;
 
 import android.content.Context;
 import android.util.SparseBooleanArray;
@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.domain.Fine;
 
 import java.util.ArrayList;
 

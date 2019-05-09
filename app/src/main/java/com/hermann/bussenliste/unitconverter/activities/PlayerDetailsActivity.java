@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -31,6 +31,12 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.repository.DataSourcePlayer;
+import com.hermann.bussenliste.unitconverter.adapters.FinesAdapter;
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;

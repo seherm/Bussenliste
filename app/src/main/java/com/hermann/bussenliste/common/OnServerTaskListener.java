@@ -1,4 +1,7 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.common;
+
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
 
 import org.json.JSONException;
 

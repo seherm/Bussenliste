@@ -1,10 +1,14 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.common;
 
 import android.content.Context;
 import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.domain.Player;
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.repository.DataSourcePlayer;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;

@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,6 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.unitconverter.activities.FineDetailActivity;
+import com.hermann.bussenliste.unitconverter.activities.FineListActivity;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.repository.DataSourceFine;
 
 /**
  * A fragment representing a single Fine detail screen.

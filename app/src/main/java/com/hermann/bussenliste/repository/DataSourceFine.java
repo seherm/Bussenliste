@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.repository;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hermann.bussenliste.domain.Fine;
+import com.hermann.bussenliste.repository.DatabaseHelper;
 
 import java.text.DateFormat;
 import java.util.ArrayList;

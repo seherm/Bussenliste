@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.repository;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

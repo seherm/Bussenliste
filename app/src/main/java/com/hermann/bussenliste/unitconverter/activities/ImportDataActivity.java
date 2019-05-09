@@ -1,4 +1,4 @@
-package com.hermann.bussenliste;
+package com.hermann.bussenliste.unitconverter.activities;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -17,6 +17,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.hermann.bussenliste.repository.DataSourceFine;
+import com.hermann.bussenliste.repository.DataSourcePlayer;
+import com.hermann.bussenliste.R;
+import com.hermann.bussenliste.domain.Player;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
@@ -290,7 +295,7 @@ public class ImportDataActivity extends AppCompatActivity {
     }
 
     private void goToMainPage(){
-        startActivity(new Intent(this,MainActivity.class));
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     private void checkFilePermissions() {
